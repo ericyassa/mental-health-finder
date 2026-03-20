@@ -14,7 +14,153 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      apps: {
+        Row: {
+          app_type: string
+          category_id: string
+          created_at: string
+          description: string | null
+          id: string
+          link: string | null
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          app_type: string
+          category_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          link?: string | null
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          app_type?: string
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          link?: string | null
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apps_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      service_contacts: {
+        Row: {
+          id: string
+          service_id: string
+          sort_order: number
+          type: string
+          value: string
+        }
+        Insert: {
+          id?: string
+          service_id: string
+          sort_order?: number
+          type: string
+          value: string
+        }
+        Update: {
+          id?: string
+          service_id?: string
+          sort_order?: number
+          type?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_contacts_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          category_id: string
+          created_at: string
+          description: string | null
+          id: string
+          link: string | null
+          name: string
+          sort_order: number
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          link?: string | null
+          name: string
+          sort_order?: number
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          link?: string | null
+          name?: string
+          sort_order?: number
+          type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
