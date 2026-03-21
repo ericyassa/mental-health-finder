@@ -4,11 +4,13 @@ import { useCategories } from "@/hooks/useDirectoryData";
 import { CategorySidebar } from "@/components/directory/CategorySidebar";
 import { CategoryDetail } from "@/components/directory/CategoryDetail";
 import { WelcomePanel } from "@/components/directory/WelcomePanel";
+import { MyCarePath } from "@/components/directory/MyCarePath";
 
 const Index = () => {
   const { data: categories = [], isLoading } = useCategories();
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showCarePath, setShowCarePath] = useState(false);
 
   const activeCategory = useMemo(
     () => categories.find((c) => c.id === activeCategoryId) ?? null,
@@ -25,7 +27,6 @@ const Index = () => {
     );
   }, [categories, searchQuery]);
 
-  // Auto-select signposting board on first load
   const signpostingBoard = categories.find((c) => c.sort_order === 0);
 
   if (isLoading) {
@@ -37,7 +38,17 @@ const Index = () => {
   }
 
   const currentCategory = activeCategory ?? signpostingBoard ?? null;
-  const isWelcome = currentCategory?.sort_order === 0;
+  const isWelcome = !showCarePath && currentCategory?.sort_order === 0;
+
+  const handleSelectCategory = (id: string) => {
+    setActiveCategoryId(id);
+    setShowCarePath(false);
+  };
+
+  const handleSelectCarePath = () => {
+    setShowCarePath(true);
+    setActiveCategoryId(null);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -70,22 +81,31 @@ const Index = () => {
 
       {/* Main layout */}
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row min-h-[calc(100vh-160px)]">
-        {/* Sidebar - hidden on mobile, shown as sheet or list */}
+        {/* Sidebar - hidden on mobile */}
         <div className="hidden md:block">
           <CategorySidebar
             categories={filteredCategories}
             activeId={currentCategory?.id ?? null}
-            onSelect={setActiveCategoryId}
+            onSelect={handleSelectCategory}
+            onSelectCarePath={handleSelectCarePath}
+            isCarePathActive={showCarePath}
           />
         </div>
 
         {/* Mobile category select */}
         <div className="md:hidden w-full px-4 pt-3">
           <select
-            value={currentCategory?.id ?? ""}
-            onChange={(e) => setActiveCategoryId(e.target.value)}
+            value={showCarePath ? "__carepath__" : (currentCategory?.id ?? "")}
+            onChange={(e) => {
+              if (e.target.value === "__carepath__") {
+                handleSelectCarePath();
+              } else {
+                handleSelectCategory(e.target.value);
+              }
+            }}
             className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm"
           >
+            <option value="__carepath__">📋 My Care Path</option>
             {filteredCategories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
@@ -96,11 +116,13 @@ const Index = () => {
 
         {/* Content area */}
         <main className="flex-1 p-6 overflow-y-auto max-h-[calc(100vh-160px)]">
-          {currentCategory && isWelcome ? (
+          {showCarePath ? (
+            <MyCarePath />
+          ) : currentCategory && isWelcome ? (
             <WelcomePanel
               description={currentCategory.description}
               categories={categories}
-              onSelectCategory={setActiveCategoryId}
+              onSelectCategory={handleSelectCategory}
             />
           ) : currentCategory ? (
             <CategoryDetail category={currentCategory} />
