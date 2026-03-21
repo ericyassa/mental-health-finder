@@ -6,6 +6,7 @@ export interface Category {
   name: string;
   description: string | null;
   sort_order: number;
+  sidebar_group: string | null;
 }
 
 export interface Service {
