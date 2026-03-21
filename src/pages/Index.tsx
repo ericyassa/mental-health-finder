@@ -69,7 +69,7 @@ const Index = () => {
       </div>
 
       {/* Main layout */}
-      <div className="max-w-7xl mx-auto flex min-h-[calc(100vh-160px)]">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row min-h-[calc(100vh-160px)]">
         {/* Sidebar - hidden on mobile, shown as sheet or list */}
         <div className="hidden md:block">
           <CategorySidebar
