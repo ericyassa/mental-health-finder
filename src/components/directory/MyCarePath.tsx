@@ -236,7 +236,7 @@ export function MyCarePath() {
             </button>
             <button
               onClick={copyReport}
-              className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700 transition-colors"
+              className="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground hover:bg-secondary/80 transition-colors"
             >
               <Copy className="h-4 w-4" />
               Copy to Clipboard
