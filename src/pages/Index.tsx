@@ -1,13 +1,18 @@
 import { useState, useMemo } from "react";
-import { Search, Loader2, Heart } from "lucide-react";
+import { Search, Loader2, Heart, LogIn, LogOut, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useCategories } from "@/hooks/useDirectoryData";
+import { useAuth } from "@/hooks/useAuth";
 import { CategorySidebar } from "@/components/directory/CategorySidebar";
 import { CategoryDetail } from "@/components/directory/CategoryDetail";
 import { WelcomePanel } from "@/components/directory/WelcomePanel";
 import { MyCarePath } from "@/components/directory/MyCarePath";
+import { FeedbackSection } from "@/components/directory/FeedbackSection";
 
 const Index = () => {
   const { data: categories = [], isLoading } = useCategories();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showCarePath, setShowCarePath] = useState(false);
@@ -51,16 +56,43 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="bg-primary text-primary-foreground py-6 px-6 text-center">
-        <div className="max-w-7xl mx-auto flex items-center justify-center gap-3">
-          <Heart className="h-8 w-8 text-accent" />
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Bristol Mental Health Signposting Guide</h1>
-            <p className="text-sm opacity-90 mt-1">
-              A comprehensive directory of mental health services and support in Bristol
-            </p>
+      <header className="bg-primary text-primary-foreground py-6 px-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Heart className="h-8 w-8 text-accent" />
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold">Bristol Mental Health Signposting Guide</h1>
+              <p className="text-sm opacity-90 mt-1">
+                A comprehensive directory of mental health services and support in Bristol
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {user ? (
+              <div className="flex items-center gap-2">
+                <span className="hidden md:inline text-xs opacity-80">
+                  <User className="h-3.5 w-3.5 inline mr-1" />
+                  {user.email}
+                </span>
+                <button
+                  onClick={signOut}
+                  className="inline-flex items-center gap-1.5 rounded-md bg-primary-foreground/10 px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary-foreground/20 transition-colors"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => navigate("/auth")}
+                className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground hover:bg-accent/90 transition-colors"
+              >
+                <LogIn className="h-3.5 w-3.5" />
+                Sign In
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -80,7 +112,7 @@ const Index = () => {
       </div>
 
       {/* Main layout */}
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row min-h-[calc(100vh-160px)]">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row flex-1 min-h-0">
         {/* Sidebar - hidden on mobile */}
         <div className="hidden md:block">
           <CategorySidebar
@@ -131,8 +163,25 @@ const Index = () => {
               Select a category to get started
             </div>
           )}
+
+          {/* Feedback section */}
+          <div className="mt-8">
+            <FeedbackSection />
+          </div>
         </main>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-primary text-primary-foreground py-4 px-6 mt-auto">
+        <div className="max-w-7xl mx-auto text-center">
+          <p className="text-xs opacity-80">
+            © {new Date().getFullYear()} Bristol Mental Health Signposting Guide — AWP NHS Foundation Trust. All rights reserved.
+          </p>
+          <p className="text-xs opacity-60 mt-1">
+            This directory is for informational purposes only. For medical emergencies, call 999.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
