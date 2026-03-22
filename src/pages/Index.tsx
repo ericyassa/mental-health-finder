@@ -175,7 +175,7 @@ const Index = () => {
       <footer className="bg-primary text-primary-foreground py-4 px-6 mt-auto">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-xs opacity-80">
-            © {new Date().getFullYear()} Bristol Mental Health Signposting Guide — AWP NHS Foundation Trust. All rights reserved.
+            © {new Date().getFullYear()} Bristol Mental Health Signposting Guide — Eric Kamgou. All rights reserved.
           </p>
           <p className="text-xs opacity-60 mt-1">
             This directory is for informational purposes only. For medical emergencies, call 999.
