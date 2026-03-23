@@ -190,6 +190,42 @@ const Index = () => {
           </p>
         </div>
       </footer>
+
+      {/* Sub-footer */}
+      <div className="bg-muted py-2 px-6">
+        <div className="max-w-7xl mx-auto text-center">
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className="text-[11px] text-muted-foreground hover:text-foreground underline transition-colors">
+                Terms of Use
+              </button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Terms of Use</DialogTitle>
+                <DialogDescription>Disclaimer and copyright notice</DialogDescription>
+              </DialogHeader>
+              <div className="text-sm text-muted-foreground space-y-3">
+                <p>
+                  This Bristol Mental Health Signposting Guide is an independent tool created for
+                  signposting purposes only. It is <strong>not</strong> intended to provide clinical
+                  advice, diagnosis, or treatment recommendations.
+                </p>
+                <p>
+                  The information provided in this directory is for general informational purposes.
+                  Always consult a qualified healthcare professional for medical advice. In an
+                  emergency, call 999.
+                </p>
+                <p>
+                  © {new Date().getFullYear()} Eric Kamgou. All rights reserved. No part of this
+                  directory may be reproduced or distributed without the express written permission
+                  of the copyright owner.
+                </p>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
     </div>
   );
 };
