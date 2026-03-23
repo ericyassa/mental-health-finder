@@ -1,5 +1,13 @@
 import { useState, useMemo } from "react";
 import { Search, Loader2, Heart, LogIn, LogOut, User } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
 import { useCategories } from "@/hooks/useDirectoryData";
 import { useAuth } from "@/hooks/useAuth";
