@@ -217,6 +217,16 @@ const Index = () => {
                   emergency, call 999.
                 </p>
                 <p>
+                  While every effort is made to keep this directory accurate, services change
+                  frequently, so users must verify contact details before directing. Therefore,
+                  the creator is not liable for any inaccuracies or actions taken based on
+                  information provided in this directory.
+                </p>
+                <p>
+                  This system is strictly for public signposting and therefore will not store any
+                  identifiable patient information.
+                </p>
+                <p>
                   © {new Date().getFullYear()} Eric Kamgou. All rights reserved. No part of this
                   directory may be reproduced or distributed without the express written permission
                   of the copyright owner.
