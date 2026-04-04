@@ -8,6 +8,28 @@ import {
 import { cn } from "@/lib/utils";
 import type { Category } from "@/hooks/useDirectoryData";
 
+// Map group names to Lucide icons
+const GROUP_ICONS: Record<string, React.ReactNode> = {
+  "🧠 Mental Health Conditions": <Brain className="h-4 w-4 shrink-0" />,
+  "👨‍👩‍👧 Youth & Family Support": <Users className="h-4 w-4 shrink-0" />,
+  "🏠 Housing & Homelessness": <House className="h-4 w-4 shrink-0" />,
+  "💼 Employment Support": <Briefcase className="h-4 w-4 shrink-0" />,
+  "💰 Financial & Debt Support": <Coins className="h-4 w-4 shrink-0" />,
+  "⚖️ Advocacy & Legal Support": <Scale className="h-4 w-4 shrink-0" />,
+  "🍞 Food & Emergency Aid": <UtensilsCrossed className="h-4 w-4 shrink-0" />,
+  "🪑 Furniture & Household Support": <Armchair className="h-4 w-4 shrink-0" />,
+  "👴 Older Adults & Ageing": <UserRound className="h-4 w-4 shrink-0" />,
+  "🏥 Physical Health & Wellbeing": <HeartPulse className="h-4 w-4 shrink-0" />,
+  "🎓 Education & Learning": <GraduationCap className="h-4 w-4 shrink-0" />,
+  "🌍 Cultural & Community Support": <Globe className="h-4 w-4 shrink-0" />,
+  "♿ Disability & Accessibility": <Accessibility className="h-4 w-4 shrink-0" />,
+  "🌿 Nature & Creative Therapies": <TreePine className="h-4 w-4 shrink-0" />,
+  "🤝 Community & Volunteering": <Handshake className="h-4 w-4 shrink-0" />,
+};
+
+// Strip emoji prefix for clean display
+const stripEmoji = (name: string) => name.replace(/^[\p{Emoji}\p{Emoji_Component}\uFE0F\u200D]+\s*/u, "");
+
 // Define the order of accordion groups
 const ACCORDION_GROUP_ORDER = [
   "🧠 Mental Health Conditions",
