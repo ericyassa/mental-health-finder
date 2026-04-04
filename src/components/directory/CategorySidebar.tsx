@@ -111,7 +111,7 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
           )}
         >
           <span className="flex items-center gap-2 truncate pr-2"><Home className="h-4 w-4 shrink-0" />{stripEmoji(signposting.name)}</span>
-          <ChevronRight className="h-4 w-4 shrink-0" />
+          <ChevronRight className="h-5 w-5 shrink-0" />
         </button>
       )}
 
@@ -126,7 +126,7 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
         )}
       >
         <span className="flex items-center gap-2 truncate pr-2"><ClipboardList className="h-4 w-4 shrink-0" />My Care Path</span>
-        <ChevronRight className="h-4 w-4 shrink-0" />
+        <ChevronRight className="h-5 w-5 shrink-0" />
       </button>
 
       {/* Accordion Groups */}
@@ -147,9 +147,9 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
             >
               <span className="flex items-center gap-2 truncate pr-2">{GROUP_ICONS[groupName]}{stripEmoji(groupName)}</span>
               {isOpen ? (
-                <ChevronDown className="h-4 w-4 shrink-0 text-primary" />
+                <ChevronDown className="h-5 w-5 shrink-0 text-primary" />
               ) : (
-                <ChevronRight className={cn("h-4 w-4 shrink-0", hasActiveChild ? "text-primary" : "text-muted-foreground")} />
+                <ChevronRight className={cn("h-5 w-5 shrink-0", hasActiveChild ? "text-primary" : "text-muted-foreground")} />
               )}
             </button>
             {isOpen && (
@@ -168,7 +168,7 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
                       )}
                     >
                       <span className="truncate pr-2">{stripEmoji(cat.name)}</span>
-                      <ChevronRight className={cn("h-3.5 w-3.5 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
+                      <ChevronRight className={cn("h-4.5 w-4.5 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
                     </button>
                   );
                 })}
@@ -196,7 +196,7 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
               {cat.name.includes("Crisis") ? <AlertTriangle className="h-4 w-4 shrink-0" /> : cat.name.includes("Suicide") ? <ShieldAlert className="h-4 w-4 shrink-0" /> : <Smile className="h-4 w-4 shrink-0" />}
               {stripEmoji(cat.name)}
             </span>
-            <ChevronRight className={cn("h-4 w-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
+            <ChevronRight className={cn("h-5 w-5 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
           </button>
         );
       })}
