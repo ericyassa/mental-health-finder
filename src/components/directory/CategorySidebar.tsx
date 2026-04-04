@@ -125,7 +125,7 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
             : "bg-accent/10 text-primary hover:bg-accent/20"
         )}
       >
-        <span className="truncate pr-2">📋 My Care Path</span>
+        <span className="flex items-center gap-2 truncate pr-2"><ClipboardList className="h-4 w-4 shrink-0" />My Care Path</span>
         <ChevronRight className="h-4 w-4 shrink-0" />
       </button>
 
