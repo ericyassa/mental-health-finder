@@ -147,9 +147,9 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
             >
               <span className="flex items-center gap-2 truncate pr-2">{GROUP_ICONS[groupName]}{stripEmoji(groupName)}</span>
               {isOpen ? (
-                <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <ChevronDown className="h-4 w-4 shrink-0 text-primary" />
               ) : (
-                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <ChevronRight className={cn("h-4 w-4 shrink-0", hasActiveChild ? "text-primary" : "text-muted-foreground")} />
               )}
             </button>
             {isOpen && (
