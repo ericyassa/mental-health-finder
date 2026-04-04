@@ -110,7 +110,7 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
               : "bg-primary text-primary-foreground hover:bg-primary/90"
           )}
         >
-          <span className="truncate pr-2">🏠 {signposting.name.replace("🏠 ", "")}</span>
+          <span className="flex items-center gap-2 truncate pr-2"><Home className="h-4 w-4 shrink-0" />{stripEmoji(signposting.name)}</span>
           <ChevronRight className="h-4 w-4 shrink-0" />
         </button>
       )}
