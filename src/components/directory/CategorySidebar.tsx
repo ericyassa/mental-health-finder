@@ -167,7 +167,7 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
                           : "text-foreground hover:bg-secondary/40"
                       )}
                     >
-                      <span className="truncate pr-2">{cat.name}</span>
+                      <span className="truncate pr-2">{stripEmoji(cat.name)}</span>
                       <ChevronRight className={cn("h-3.5 w-3.5 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
                     </button>
                   );
