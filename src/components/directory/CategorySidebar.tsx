@@ -1,7 +1,34 @@
 import { useState } from "react";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import {
+  ChevronRight, ChevronDown, Home, ClipboardList, Brain, Users, House,
+  Briefcase, Coins, Scale, UtensilsCrossed, Armchair, UserRound,
+  HeartPulse, GraduationCap, Globe, Accessibility, TreePine, Handshake,
+  AlertTriangle, ShieldAlert, Smile
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Category } from "@/hooks/useDirectoryData";
+
+// Map group names to Lucide icons
+const GROUP_ICONS: Record<string, React.ReactNode> = {
+  "🧠 Mental Health Conditions": <Brain className="h-4 w-4 shrink-0" />,
+  "👨‍👩‍👧 Youth & Family Support": <Users className="h-4 w-4 shrink-0" />,
+  "🏠 Housing & Homelessness": <House className="h-4 w-4 shrink-0" />,
+  "💼 Employment Support": <Briefcase className="h-4 w-4 shrink-0" />,
+  "💰 Financial & Debt Support": <Coins className="h-4 w-4 shrink-0" />,
+  "⚖️ Advocacy & Legal Support": <Scale className="h-4 w-4 shrink-0" />,
+  "🍞 Food & Emergency Aid": <UtensilsCrossed className="h-4 w-4 shrink-0" />,
+  "🪑 Furniture & Household Support": <Armchair className="h-4 w-4 shrink-0" />,
+  "👴 Older Adults & Ageing": <UserRound className="h-4 w-4 shrink-0" />,
+  "🏥 Physical Health & Wellbeing": <HeartPulse className="h-4 w-4 shrink-0" />,
+  "🎓 Education & Learning": <GraduationCap className="h-4 w-4 shrink-0" />,
+  "🌍 Cultural & Community Support": <Globe className="h-4 w-4 shrink-0" />,
+  "♿ Disability & Accessibility": <Accessibility className="h-4 w-4 shrink-0" />,
+  "🌿 Nature & Creative Therapies": <TreePine className="h-4 w-4 shrink-0" />,
+  "🤝 Community & Volunteering": <Handshake className="h-4 w-4 shrink-0" />,
+};
+
+// Strip emoji prefix for clean display
+const stripEmoji = (name: string) => name.replace(/^[\p{Emoji}\p{Emoji_Component}\uFE0F\u200D]+\s*/u, "");
 
 // Define the order of accordion groups
 const ACCORDION_GROUP_ORDER = [
@@ -83,7 +110,7 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
               : "bg-primary text-primary-foreground hover:bg-primary/90"
           )}
         >
-          <span className="truncate pr-2">🏠 {signposting.name.replace("🏠 ", "")}</span>
+          <span className="flex items-center gap-2 truncate pr-2"><Home className="h-4 w-4 shrink-0" />{stripEmoji(signposting.name)}</span>
           <ChevronRight className="h-4 w-4 shrink-0" />
         </button>
       )}
@@ -98,7 +125,7 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
             : "bg-accent/10 text-primary hover:bg-accent/20"
         )}
       >
-        <span className="truncate pr-2">📋 My Care Path</span>
+        <span className="flex items-center gap-2 truncate pr-2"><ClipboardList className="h-4 w-4 shrink-0" />My Care Path</span>
         <ChevronRight className="h-4 w-4 shrink-0" />
       </button>
 
@@ -118,7 +145,7 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
                 hasActiveChild ? "bg-primary/10 text-primary" : "bg-secondary/40 text-foreground hover:bg-secondary/60"
               )}
             >
-              <span className="truncate pr-2">{groupName}</span>
+              <span className="flex items-center gap-2 truncate pr-2">{GROUP_ICONS[groupName]}{stripEmoji(groupName)}</span>
               {isOpen ? (
                 <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
               ) : (
@@ -140,7 +167,7 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
                           : "text-foreground hover:bg-secondary/40"
                       )}
                     >
-                      <span className="truncate pr-2">{cat.name}</span>
+                      <span className="truncate pr-2">{stripEmoji(cat.name)}</span>
                       <ChevronRight className={cn("h-3.5 w-3.5 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
                     </button>
                   );
@@ -165,7 +192,10 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
                 : "bg-secondary/60 text-foreground hover:bg-secondary"
             )}
           >
-            <span className="truncate pr-2">{cat.name}</span>
+            <span className="flex items-center gap-2 truncate pr-2">
+              {cat.name.includes("Crisis") ? <AlertTriangle className="h-4 w-4 shrink-0" /> : cat.name.includes("Suicide") ? <ShieldAlert className="h-4 w-4 shrink-0" /> : <Smile className="h-4 w-4 shrink-0" />}
+              {stripEmoji(cat.name)}
+            </span>
             <ChevronRight className={cn("h-4 w-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
           </button>
         );
