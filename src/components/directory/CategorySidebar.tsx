@@ -161,7 +161,7 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
                       key={cat.id}
                       onClick={() => onSelect(cat.id)}
                       className={cn(
-                        "w-full flex items-center justify-between pl-8 pr-5 py-2.5 text-left text-sm border-b border-border/30 transition-colors",
+                        "w-full flex items-center justify-between pl-8 pr-5 py-2.5 text-left text-sm border-b border-dashed border-primary/40 transition-colors",
                         isActive
                           ? "bg-accent/15 text-primary font-semibold border-l-4 border-l-accent"
                           : "text-foreground hover:bg-secondary/40"
