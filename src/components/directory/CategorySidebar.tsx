@@ -196,7 +196,7 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
               {cat.name.includes("Crisis") ? <AlertTriangle className="h-4 w-4 shrink-0" /> : cat.name.includes("Suicide") ? <ShieldAlert className="h-4 w-4 shrink-0" /> : <Smile className="h-4 w-4 shrink-0" />}
               {stripEmoji(cat.name)}
             </span>
-            <ChevronRight className={cn("h-4 w-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
+            <ChevronRight className={cn("h-5 w-5 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
           </button>
         );
       })}
