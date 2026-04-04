@@ -142,7 +142,7 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
               onClick={() => toggleGroup(groupName)}
               className={cn(
                 "w-full flex items-center justify-between px-5 py-3 text-left text-sm font-semibold border-b border-border/50 transition-colors",
-                hasActiveChild ? "bg-primary/10 text-primary" : "bg-secondary/40 text-foreground hover:bg-secondary/60"
+                hasActiveChild || isOpen ? "bg-card text-primary" : "bg-secondary/40 text-foreground hover:bg-secondary/60"
               )}
             >
               <span className="flex items-center gap-2 truncate pr-2">{GROUP_ICONS[groupName]}{stripEmoji(groupName)}</span>
