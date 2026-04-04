@@ -168,7 +168,7 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
                       )}
                     >
                       <span className="truncate pr-2">{stripEmoji(cat.name)}</span>
-                      <ChevronRight className={cn("h-3.5 w-3.5 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
+                      <ChevronRight className={cn("h-4.5 w-4.5 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
                     </button>
                   );
                 })}
