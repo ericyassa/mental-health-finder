@@ -126,7 +126,7 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
         )}
       >
         <span className="flex items-center gap-2 truncate pr-2"><ClipboardList className="h-4 w-4 shrink-0" />My Care Path</span>
-        <ChevronRight className="h-4 w-4 shrink-0" />
+        <ChevronRight className="h-5 w-5 shrink-0" />
       </button>
 
       {/* Accordion Groups */}
