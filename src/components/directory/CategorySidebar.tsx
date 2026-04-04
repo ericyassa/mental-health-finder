@@ -192,7 +192,10 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
                 : "bg-secondary/60 text-foreground hover:bg-secondary"
             )}
           >
-            <span className="truncate pr-2">{cat.name}</span>
+            <span className="flex items-center gap-2 truncate pr-2">
+              {cat.name.includes("Crisis") ? <AlertTriangle className="h-4 w-4 shrink-0" /> : cat.name.includes("Suicide") ? <ShieldAlert className="h-4 w-4 shrink-0" /> : <Smile className="h-4 w-4 shrink-0" />}
+              {stripEmoji(cat.name)}
+            </span>
             <ChevronRight className={cn("h-4 w-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
           </button>
         );
