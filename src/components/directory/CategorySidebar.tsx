@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import {
+  ChevronRight, ChevronDown, Home, ClipboardList, Brain, Users, House,
+  Briefcase, Coins, Scale, UtensilsCrossed, Armchair, UserRound,
+  HeartPulse, GraduationCap, Globe, Accessibility, TreePine, Handshake,
+  AlertTriangle, ShieldAlert, Smile
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Category } from "@/hooks/useDirectoryData";
 
