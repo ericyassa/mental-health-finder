@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Search, Loader2, Heart, LogIn, LogOut, User } from "lucide-react";
+import { Loader2, Heart, LogIn, LogOut, User } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,29 +16,18 @@ import { CategoryDetail } from "@/components/directory/CategoryDetail";
 import { WelcomePanel } from "@/components/directory/WelcomePanel";
 import { MyCarePath } from "@/components/directory/MyCarePath";
 import { FeedbackSection } from "@/components/directory/FeedbackSection";
+import { SearchBar } from "@/components/directory/SearchBar";
 
 const Index = () => {
   const { data: categories = [], isLoading } = useCategories();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showCarePath, setShowCarePath] = useState(false);
 
   const activeCategory = useMemo(
     () => categories.find((c) => c.id === activeCategoryId) ?? null,
     [categories, activeCategoryId]
   );
-
-  const filteredCategories = useMemo(() => {
-    if (!searchQuery.trim()) return categories;
-    const q = searchQuery.toLowerCase();
-    return categories.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.description?.toLowerCase().includes(q)
-    );
-  }, [categories, searchQuery]);
 
   const signpostingBoard = categories.find((c) => c.sort_order === 0);
 
@@ -106,25 +95,14 @@ const Index = () => {
       </header>
 
       {/* Search */}
-      <div className="bg-muted border-b border-border px-6 py-3">
-        <div className="max-w-7xl mx-auto relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search conditions or services..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-input bg-background px-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition-colors"
-          />
-        </div>
-      </div>
+      <SearchBar categories={categories} onSelectCategory={handleSelectCategory} />
 
       {/* Main layout */}
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row flex-1 min-h-0">
         {/* Sidebar - hidden on mobile */}
         <div className="hidden md:block">
           <CategorySidebar
-            categories={filteredCategories}
+            categories={categories}
             activeId={currentCategory?.id ?? null}
             onSelect={handleSelectCategory}
             onSelectCarePath={handleSelectCarePath}
@@ -146,7 +124,7 @@ const Index = () => {
             className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm"
           >
             <option value="__carepath__">📋 My Care Path</option>
-            {filteredCategories.map((cat) => (
+            {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
               </option>
