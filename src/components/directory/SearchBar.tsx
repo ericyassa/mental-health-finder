@@ -155,8 +155,24 @@ export function SearchBar({ categories, onSelectCategory }: SearchBarProps) {
           onChange={(e) => {
             setQuery(e.target.value);
             setIsOpen(true);
+            setActiveIndex(-1);
           }}
           onFocus={() => query.trim().length >= 2 && setIsOpen(true)}
+          onKeyDown={(e) => {
+            if (!isOpen || results.length === 0) return;
+            if (e.key === "ArrowDown") {
+              e.preventDefault();
+              setActiveIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0));
+            } else if (e.key === "ArrowUp") {
+              e.preventDefault();
+              setActiveIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1));
+            } else if (e.key === "Enter" && activeIndex >= 0) {
+              e.preventDefault();
+              handleSelect(results[activeIndex]);
+            } else if (e.key === "Escape") {
+              setIsOpen(false);
+            }
+          }}
           className="w-full rounded-lg border border-input bg-background px-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition-colors"
         />
         {query && (
@@ -171,11 +187,15 @@ export function SearchBar({ categories, onSelectCategory }: SearchBarProps) {
         {/* Results dropdown */}
         {isOpen && results.length > 0 && (
           <div className="absolute z-50 top-full mt-1 w-full bg-background border border-border rounded-lg shadow-lg max-h-80 overflow-y-auto">
-            {results.map((result) => (
+            {results.map((result, index) => (
               <button
                 key={`${result.type}-${result.id}`}
                 onClick={() => handleSelect(result)}
-                className="w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-muted/60 transition-colors border-b border-border/30 last:border-b-0"
+                className={cn(
+                  "w-full flex items-start gap-3 px-4 py-3 text-left transition-colors border-b border-border/30 last:border-b-0",
+                  index === activeIndex ? "bg-muted" : "hover:bg-muted/60"
+                )}
+                onMouseEnter={() => setActiveIndex(index)}
               >
                 <div className="mt-0.5">{typeIcon(result.type)}</div>
                 <div className="flex-1 min-w-0">
