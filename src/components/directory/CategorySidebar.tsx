@@ -141,8 +141,8 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
             <button
               onClick={() => toggleGroup(groupName)}
               className={cn(
-                "w-full flex items-center justify-between px-5 py-3 text-left text-sm font-semibold border-b border-border/50 transition-colors",
-                hasActiveChild || isOpen ? "bg-card text-[#3A7298]" : "bg-secondary/40 text-[#3A7298] hover:bg-secondary/60"
+                "w-full flex items-center justify-between px-5 py-3 text-left text-sm font-semibold transition-colors",
+                hasActiveChild || isOpen ? "bg-card text-[#3A7298] border-b-2 border-b-[#1a3a5c]" : "bg-secondary/40 text-[#3A7298] border-b border-border/50 hover:bg-secondary/60"
               )}
             >
               <span className="flex items-center gap-2 truncate pr-2">{GROUP_ICONS[groupName]}{stripEmoji(groupName)}</span>
@@ -168,7 +168,7 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
                       )}
                     >
                       <span className="truncate pr-2">{stripEmoji(cat.name)}</span>
-                      <ChevronRight className={cn("h-4.5 w-4.5 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
+                      <span className="flex items-center justify-center h-5 w-5 rounded-full bg-[#1a3a5c] shrink-0"><ChevronRight className="h-3.5 w-3.5 text-green-400" /></span>
                     </button>
                   );
                 })}
