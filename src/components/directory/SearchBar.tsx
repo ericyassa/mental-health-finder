@@ -126,6 +126,7 @@ export function SearchBar({ categories, onSelectCategory }: SearchBarProps) {
     onSelectCategory(result.categoryId);
     setQuery("");
     setIsOpen(false);
+    setActiveIndex(-1);
   };
 
   const typeIcon = (type: SearchResult["type"]) => {
