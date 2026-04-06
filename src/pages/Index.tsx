@@ -23,6 +23,7 @@ const Index = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
+  const [showCarePath, setShowCarePath] = useState(false);
 
   const activeCategory = useMemo(
     () => categories.find((c) => c.id === activeCategoryId) ?? null,
