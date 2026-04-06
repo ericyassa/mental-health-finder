@@ -22,6 +22,7 @@ interface SearchBarProps {
 export function SearchBar({ categories, onSelectCategory }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
   const debouncedQuery = useDebounce(query, 300);
 
