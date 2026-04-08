@@ -114,6 +114,9 @@ const Auth = () => {
                     required
                   />
                 </div>
+                {!isLogin && (
+                  <p className="text-xs text-muted-foreground mt-1">Only @nhs.net email addresses are accepted</p>
+                )}
               </div>
 
               <div>
