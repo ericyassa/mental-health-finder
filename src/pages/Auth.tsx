@@ -13,8 +13,20 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const isNhsEmail = (email: string) => email.trim().toLowerCase().endsWith("@nhs.net");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isLogin && !isNhsEmail(email)) {
+      toast({
+        title: "NHS email required",
+        description: "Only @nhs.net email addresses can register. Please use your NHS email.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     if (isLogin) {
