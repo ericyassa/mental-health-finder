@@ -13,8 +13,20 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const isNhsEmail = (email: string) => email.trim().toLowerCase().endsWith("@nhs.net");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isLogin && !isNhsEmail(email)) {
+      toast({
+        title: "NHS email required",
+        description: "Only @nhs.net email addresses can register. Please use your NHS email.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     if (isLogin) {
@@ -97,11 +109,14 @@ const Auth = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
+                    placeholder={isLogin ? "you@nhs.net" : "yourname@nhs.net"}
                     className="w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                     required
                   />
                 </div>
+                {!isLogin && (
+                  <p className="text-xs text-muted-foreground mt-1">Only @nhs.net email addresses are accepted</p>
+                )}
               </div>
 
               <div>
