@@ -51,6 +51,7 @@ const ACCORDION_GROUP_ORDER = [
 
 // Special ungrouped items shown at bottom
 const SPECIAL_ITEMS = ["Crisis Support (Urgent)", "Suicide Prevention", "AWP Staff Wellbeing"];
+const SPECIAL_ITEMS_ORDER = ["Crisis Support (Urgent)", "Suicide Prevention", "AWP Staff Wellbeing"];
 
 interface CategorySidebarProps {
   categories: Category[];
@@ -178,28 +179,37 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
         );
       })}
 
-      {/* Special items at bottom */}
-      {specialCats.map((cat) => {
-        const isActive = activeId === cat.id && !isCarePathActive;
-        return (
-          <button
-            key={cat.id}
-            onClick={() => onSelect(cat.id)}
-            className={cn(
-              "w-full flex items-center justify-between px-5 py-3.5 text-left text-sm font-medium border-b border-border/50 transition-colors",
-              isActive
-                ? "bg-accent/15 text-primary font-semibold border-l-4 border-l-accent"
-                : "bg-secondary/60 text-foreground hover:bg-secondary"
-            )}
-          >
-            <span className="flex items-center gap-2 truncate pr-2">
-              {cat.name.includes("Crisis") ? <AlertTriangle className="h-4 w-4 shrink-0" /> : cat.name.includes("Suicide") ? <ShieldAlert className="h-4 w-4 shrink-0" /> : <Smile className="h-4 w-4 shrink-0" />}
-              {stripEmoji(cat.name)}
-            </span>
-            <ChevronRight className={cn("h-5 w-5 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
-          </button>
-        );
-      })}
+      {/* Special items at bottom — ordered: Crisis, Suicide, then AWP */}
+      {specialCats
+        .sort((a, b) => SPECIAL_ITEMS_ORDER.indexOf(a.name) - SPECIAL_ITEMS_ORDER.indexOf(b.name))
+        .map((cat) => {
+          const isActive = activeId === cat.id && !isCarePathActive;
+          const isCrisis = cat.name.includes("Crisis");
+          const isSuicide = cat.name.includes("Suicide");
+          const isAWP = cat.name.includes("AWP");
+
+          return (
+            <button
+              key={cat.id}
+              onClick={() => onSelect(cat.id)}
+              className={cn(
+                "w-full flex items-center justify-between px-5 py-3.5 text-left text-sm font-bold border-b transition-colors",
+                isCrisis && !isActive && "bg-destructive/15 text-destructive border-b-destructive/30 hover:bg-destructive/25",
+                isCrisis && isActive && "bg-destructive/25 text-destructive border-l-4 border-l-destructive",
+                isSuicide && !isActive && "bg-destructive/10 text-destructive/90 border-b-destructive/20 hover:bg-destructive/20",
+                isSuicide && isActive && "bg-destructive/20 text-destructive border-l-4 border-l-destructive",
+                isAWP && !isActive && "bg-accent/30 text-primary border-b-accent/40 hover:bg-accent/40",
+                isAWP && isActive && "bg-accent/40 text-primary border-l-4 border-l-accent",
+              )}
+            >
+              <span className="flex items-center gap-2 truncate pr-2">
+                {isCrisis ? <AlertTriangle className="h-4 w-4 shrink-0" /> : isSuicide ? <ShieldAlert className="h-4 w-4 shrink-0" /> : <Smile className="h-4 w-4 shrink-0" />}
+                {stripEmoji(cat.name)}
+              </span>
+              <ChevronRight className={cn("h-5 w-5 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
+            </button>
+          );
+        })}
     </aside>
   );
 }
