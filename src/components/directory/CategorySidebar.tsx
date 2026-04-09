@@ -51,6 +51,7 @@ const ACCORDION_GROUP_ORDER = [
 
 // Special ungrouped items shown at bottom
 const SPECIAL_ITEMS = ["Crisis Support (Urgent)", "Suicide Prevention", "AWP Staff Wellbeing"];
+const SPECIAL_ITEMS_ORDER = ["Crisis Support (Urgent)", "Suicide Prevention", "AWP Staff Wellbeing"];
 
 interface CategorySidebarProps {
   categories: Category[];
