@@ -112,26 +112,67 @@ export type Database = {
         }
         Relationships: []
       }
+      login_attempts: {
+        Row: {
+          attempt_count: number
+          created_at: string
+          id: string
+          last_attempt_at: string | null
+          locked: boolean
+          profile_id: string
+        }
+        Insert: {
+          attempt_count?: number
+          created_at?: string
+          id?: string
+          last_attempt_at?: string | null
+          locked?: boolean
+          profile_id: string
+        }
+        Update: {
+          attempt_count?: number
+          created_at?: string
+          id?: string
+          last_attempt_at?: string | null
+          locked?: boolean
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "login_attempts_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
           display_name: string | null
           email: string | null
+          favorite_meal: string | null
           id: string
+          team: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           display_name?: string | null
           email?: string | null
+          favorite_meal?: string | null
           id: string
+          team?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           display_name?: string | null
           email?: string | null
+          favorite_meal?: string | null
           id?: string
+          team?: string | null
           updated_at?: string
         }
         Relationships: []
