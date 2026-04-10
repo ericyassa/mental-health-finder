@@ -54,9 +54,9 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="h-screen bg-background flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="bg-primary text-primary-foreground py-6 px-6">
+      <header className="shrink-0 bg-primary text-primary-foreground py-6 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Heart className="h-8 w-8 text-accent" />
@@ -96,12 +96,14 @@ const Index = () => {
       </header>
 
       {/* Search */}
-      <SearchBar categories={categories} onSelectCategory={handleSelectCategory} />
+      <div className="shrink-0">
+        <SearchBar categories={categories} onSelectCategory={handleSelectCategory} />
+      </div>
 
       {/* Main layout */}
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row flex-1 min-h-0">
+      <div className="mx-auto flex w-full max-w-7xl flex-1 min-h-0 min-w-0 flex-col overflow-hidden md:flex-row">
         {/* Sidebar - hidden on mobile */}
-        <div className="hidden md:block">
+        <div className="hidden h-full shrink-0 md:block">
           <CategorySidebar
             categories={categories}
             activeId={currentCategory?.id ?? null}
@@ -112,7 +114,7 @@ const Index = () => {
         </div>
 
         {/* Mobile category select */}
-        <div className="md:hidden w-full px-4 pt-3">
+        <div className="w-full shrink-0 px-4 pt-3 md:hidden">
           <select
             value={showCarePath ? "__carepath__" : (currentCategory?.id ?? "")}
             onChange={(e) => {
@@ -134,7 +136,7 @@ const Index = () => {
         </div>
 
         {/* Content area */}
-        <main className="flex-1 p-6 overflow-y-scroll max-h-[calc(100vh-160px)]">
+        <main className="h-full min-w-0 flex-1 overflow-x-hidden overflow-y-scroll [scrollbar-gutter:stable] p-6">
           {showCarePath ? (
             <MyCarePath />
           ) : currentCategory && isWelcome ? (
@@ -159,7 +161,7 @@ const Index = () => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-primary text-primary-foreground py-4 px-6 mt-auto">
+      <footer className="shrink-0 bg-primary text-primary-foreground py-4 px-6">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-xs opacity-80">
             © {new Date().getFullYear()} Bristol Mental Health Signposting Guide — Eric Kamgou. All rights reserved.
@@ -171,7 +173,7 @@ const Index = () => {
       </footer>
 
       {/* Sub-footer */}
-      <div className="bg-muted py-2 px-6">
+      <div className="shrink-0 bg-muted py-2 px-6">
         <div className="max-w-7xl mx-auto text-center">
           <Dialog>
             <DialogTrigger asChild>

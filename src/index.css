@@ -80,7 +80,22 @@
     @apply border-border;
   }
 
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  html {
+    scrollbar-gutter: stable;
+  }
+
   body {
     @apply bg-background text-foreground;
+    overflow: hidden;
+  }
+
+  #root {
+    min-height: 100%;
   }
 }

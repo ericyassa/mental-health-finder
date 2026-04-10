@@ -99,7 +99,7 @@ export function CategorySidebar({ categories, activeId, onSelect, onSelectCarePa
   }
 
   return (
-    <aside className="w-72 min-w-[280px] shrink-0 border-r border-border bg-sidebar-background overflow-y-auto max-h-[calc(100vh-160px)]">
+    <aside className="h-full w-72 min-w-[280px] shrink-0 overflow-y-auto [scrollbar-gutter:stable] border-r border-border bg-sidebar-background">
       {/* Signposting Board */}
       {signposting && (
         <button
