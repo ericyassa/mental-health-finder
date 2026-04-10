@@ -134,7 +134,7 @@ const Index = () => {
         </div>
 
         {/* Content area */}
-        <main className="flex-1 p-6 overflow-y-auto max-h-[calc(100vh-160px)]">
+        <main className="flex-1 p-6 overflow-y-scroll max-h-[calc(100vh-160px)]">
           {showCarePath ? (
             <MyCarePath />
           ) : currentCategory && isWelcome ? (
