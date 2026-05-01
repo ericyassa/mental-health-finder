@@ -174,9 +174,14 @@ export function MyCarePath() {
     const dateStr = now.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) +
       " at " + now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
+    const synopticAnswers = synopticQuestions
+      .map((q) => ({ question: q.label, answer: (synoptic[q.id] || "").trim() }))
+      .filter((s) => s.answer.length > 0);
+
     setReport({
       selectedNeeds,
       matchedCategories: matchedCats.map((c) => ({ name: c.name, services: [] })),
+      synoptic: synopticAnswers,
       date: dateStr,
     });
   };
