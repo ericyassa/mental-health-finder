@@ -188,7 +188,10 @@ export function MyCarePath() {
 
   const copyReport = () => {
     if (!report) return;
-    const text = `My Care Path – Summary Report\nGenerated: ${report.date}\n\nIdentified Needs:\n${report.selectedNeeds.map((n) => `• ${n}`).join("\n")}\n\nMatched Categories:\n${report.matchedCategories.map((c) => `• ${c.name}`).join("\n")}\n\nThis report was generated from the Bristol Mental Health Signposting Directory.`;
+    const synopticBlock = report.synoptic.length > 0
+      ? `\n\nSynoptic View:\n${report.synoptic.map((s) => `• ${s.question}\n   ${s.answer}`).join("\n")}`
+      : "";
+    const text = `My Care Path – Summary Report\nGenerated: ${report.date}\n\nIdentified Needs:\n${report.selectedNeeds.map((n) => `• ${n}`).join("\n")}\n\nMatched Categories:\n${report.matchedCategories.map((c) => `• ${c.name}`).join("\n")}${synopticBlock}\n\nThis report was generated from the Bristol Mental Health Signposting Directory.`;
     navigator.clipboard.writeText(text);
   };
 
