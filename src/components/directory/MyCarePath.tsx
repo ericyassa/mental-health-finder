@@ -150,8 +150,9 @@ export function MyCarePath() {
   };
 
   const generateReport = () => {
-    if (checked.size === 0) {
-      setHint("⚠️ Please select at least one need");
+    const hasSynoptic = synopticQuestions.some((q) => (synoptic[q.id] || "").trim().length > 0);
+    if (checked.size === 0 && !hasSynoptic) {
+      setHint("⚠️ Please tick at least one need or fill in a synoptic question");
       return;
     }
 
