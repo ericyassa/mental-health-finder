@@ -79,6 +79,21 @@ const carePathNeeds: CareNeedGroup[] = [
     ],
   },
   {
+    label: "Medication & Medical Review",
+    needs: [
+      { id: "med_gp_review", label: "Needs a GP medication review", categoryNames: [] },
+      { id: "med_side_effects", label: "Experiencing medication side effects", categoryNames: [] },
+      { id: "med_non_compliant", label: "Not taking medication as prescribed (non-compliance)", categoryNames: [] },
+      { id: "med_ineffective", label: "Current medication feels ineffective / not working", categoryNames: [] },
+      { id: "med_crisis", label: "Urgent crisis team medication attention required", categoryNames: ["Crisis Support (Urgent)"] },
+      { id: "med_overdue_review", label: "Last medication review was over 6 months ago / unknown", categoryNames: [] },
+      { id: "med_running_out", label: "Running out of medication / repeat prescription needed", categoryNames: [] },
+      { id: "med_polypharmacy", label: "Taking multiple medications – concerns about interactions", categoryNames: [] },
+      { id: "med_missed_doses", label: "Frequently missing or forgetting doses", categoryNames: [] },
+      { id: "med_depot", label: "Due / overdue for depot injection", categoryNames: ["Crisis Support (Urgent)"] },
+    ],
+  },
+  {
     label: "Staff Wellbeing",
     needs: [
       { id: "awp_staff", label: "AWP staff wellbeing support", categoryNames: ["AWP Staff Wellbeing"] },
