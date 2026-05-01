@@ -302,6 +302,20 @@ export function MyCarePath() {
             </div>
           )}
 
+          {report.synoptic.length > 0 && (
+            <div>
+              <h4 className="text-sm font-bold text-foreground mb-2">🩺 Synoptic View</h4>
+              <ul className="space-y-2">
+                {report.synoptic.map((s, i) => (
+                  <li key={i} className="text-sm text-foreground">
+                    <div className="font-medium">• {s.question}</div>
+                    <div className="pl-4 text-muted-foreground whitespace-pre-wrap">{s.answer}</div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div className="flex gap-3 flex-wrap pt-2">
             <button
               onClick={() => window.print()}
