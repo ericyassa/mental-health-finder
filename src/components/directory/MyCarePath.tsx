@@ -94,6 +94,21 @@ const carePathNeeds: CareNeedGroup[] = [
     ],
   },
   {
+    label: "Physical Health",
+    needs: [
+      { id: "ph_chronic", label: "Chronic physical health condition (e.g. diabetes, COPD, heart disease)", categoryNames: ["Physical Health & Wellbeing"] },
+      { id: "ph_pain", label: "Persistent or chronic pain", categoryNames: ["Physical Health & Wellbeing"] },
+      { id: "ph_sleep", label: "Sleep problems / insomnia", categoryNames: ["Physical Health & Wellbeing"] },
+      { id: "ph_weight", label: "Weight, nutrition or eating concerns", categoryNames: ["Physical Health & Wellbeing"] },
+      { id: "ph_activity", label: "Low physical activity / sedentary lifestyle", categoryNames: ["Physical Health & Wellbeing"] },
+      { id: "ph_smoking", label: "Smoking, vaping or wants to quit", categoryNames: ["Physical Health & Wellbeing"] },
+      { id: "ph_smi_check", label: "Overdue annual SMI physical health check", categoryNames: ["Physical Health & Wellbeing"] },
+      { id: "ph_dental", label: "Dental or oral health needs", categoryNames: ["Physical Health & Wellbeing"] },
+      { id: "ph_sexual", label: "Sexual health concerns", categoryNames: ["Physical Health & Wellbeing"] },
+      { id: "ph_pregnancy", label: "Pregnancy or postnatal physical health", categoryNames: ["Physical Health & Wellbeing"] },
+    ],
+  },
+  {
     label: "Staff Wellbeing",
     needs: [
       { id: "awp_staff", label: "AWP staff wellbeing support", categoryNames: ["AWP Staff Wellbeing"] },
@@ -101,14 +116,25 @@ const carePathNeeds: CareNeedGroup[] = [
   },
 ];
 
+// Synoptic clinical questions — free-text responses
+const synopticQuestions = [
+  { id: "syn_diagnosis", label: "Previous and current mental health diagnoses (if any)", placeholder: "e.g. Depression (2019), current GAD diagnosis…" },
+  { id: "syn_therapy", label: "Have you had therapy or psychological support before? What kind, and was it helpful?", placeholder: "e.g. CBT in 2021 — helpful for anxiety; counselling at university…" },
+  { id: "syn_coping", label: "What coping mechanisms or strategies do you use (helpful or unhelpful)?", placeholder: "e.g. walking, journalling, breathing exercises; also drinking when stressed…" },
+  { id: "syn_support", label: "Who is in your current support network (family, friends, professionals)?", placeholder: "e.g. partner, GP, sister, peer support group…" },
+  { id: "syn_goals", label: "What would you like to achieve? What are your goals for support?", placeholder: "e.g. manage anxiety, return to work, improve sleep, rebuild confidence…" },
+];
+
 interface ReportData {
   selectedNeeds: string[];
   matchedCategories: { name: string; services: { name: string; type: string | null; contacts: string }[] }[];
+  synoptic: { question: string; answer: string }[];
   date: string;
 }
 
 export function MyCarePath() {
   const [checked, setChecked] = useState<Set<string>>(new Set());
+  const [synoptic, setSynoptic] = useState<Record<string, string>>({});
   const [report, setReport] = useState<ReportData | null>(null);
   const [hint, setHint] = useState("Select at least one need above");
   const { data: categories = [] } = useCategories();
@@ -124,8 +150,9 @@ export function MyCarePath() {
   };
 
   const generateReport = () => {
-    if (checked.size === 0) {
-      setHint("⚠️ Please select at least one need");
+    const hasSynoptic = synopticQuestions.some((q) => (synoptic[q.id] || "").trim().length > 0);
+    if (checked.size === 0 && !hasSynoptic) {
+      setHint("⚠️ Please tick at least one need or fill in a synoptic question");
       return;
     }
 
@@ -148,16 +175,24 @@ export function MyCarePath() {
     const dateStr = now.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) +
       " at " + now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
+    const synopticAnswers = synopticQuestions
+      .map((q) => ({ question: q.label, answer: (synoptic[q.id] || "").trim() }))
+      .filter((s) => s.answer.length > 0);
+
     setReport({
       selectedNeeds,
       matchedCategories: matchedCats.map((c) => ({ name: c.name, services: [] })),
+      synoptic: synopticAnswers,
       date: dateStr,
     });
   };
 
   const copyReport = () => {
     if (!report) return;
-    const text = `My Care Path – Summary Report\nGenerated: ${report.date}\n\nIdentified Needs:\n${report.selectedNeeds.map((n) => `• ${n}`).join("\n")}\n\nMatched Categories:\n${report.matchedCategories.map((c) => `• ${c.name}`).join("\n")}\n\nThis report was generated from the Bristol Mental Health Signposting Directory.`;
+    const synopticBlock = report.synoptic.length > 0
+      ? `\n\nSynoptic View:\n${report.synoptic.map((s) => `• ${s.question}\n   ${s.answer}`).join("\n")}`
+      : "";
+    const text = `My Care Path – Summary Report\nGenerated: ${report.date}\n\nIdentified Needs:\n${report.selectedNeeds.map((n) => `• ${n}`).join("\n")}\n\nMatched Categories:\n${report.matchedCategories.map((c) => `• ${c.name}`).join("\n")}${synopticBlock}\n\nThis report was generated from the Bristol Mental Health Signposting Directory.`;
     navigator.clipboard.writeText(text);
   };
 
@@ -196,6 +231,33 @@ export function MyCarePath() {
           </div>
         </div>
       ))}
+
+      {/* Synoptic View — quick clinical snapshot */}
+      <div className="space-y-3 rounded-lg border-l-4 border-l-primary bg-primary/5 p-4">
+        <div>
+          <h3 className="text-lg font-semibold text-primary">🩺 Synoptic View – Quick Snapshot</h3>
+          <p className="text-xs text-muted-foreground mt-1">
+            Five short questions to give your support worker a fast understanding of your past and current picture. Optional – fill in what you feel comfortable sharing.
+          </p>
+        </div>
+        <div className="space-y-3">
+          {synopticQuestions.map((q) => (
+            <div key={q.id} className="space-y-1">
+              <label htmlFor={q.id} className="block text-sm font-medium text-foreground">
+                {q.label}
+              </label>
+              <textarea
+                id={q.id}
+                value={synoptic[q.id] || ""}
+                onChange={(e) => { setSynoptic((p) => ({ ...p, [q.id]: e.target.value })); setReport(null); }}
+                placeholder={q.placeholder}
+                rows={2}
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
 
       <div className="flex items-center gap-4 flex-wrap">
         <button
@@ -236,6 +298,20 @@ export function MyCarePath() {
               <ul className="space-y-1">
                 {report.matchedCategories.map((c, i) => (
                   <li key={i} className="text-sm text-foreground">• {c.name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {report.synoptic.length > 0 && (
+            <div>
+              <h4 className="text-sm font-bold text-foreground mb-2">🩺 Synoptic View</h4>
+              <ul className="space-y-2">
+                {report.synoptic.map((s, i) => (
+                  <li key={i} className="text-sm text-foreground">
+                    <div className="font-medium">• {s.question}</div>
+                    <div className="pl-4 text-muted-foreground whitespace-pre-wrap">{s.answer}</div>
+                  </li>
                 ))}
               </ul>
             </div>
