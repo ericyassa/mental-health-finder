@@ -231,6 +231,33 @@ export function MyCarePath() {
         </div>
       ))}
 
+      {/* Synoptic View — quick clinical snapshot */}
+      <div className="space-y-3 rounded-lg border-l-4 border-l-primary bg-primary/5 p-4">
+        <div>
+          <h3 className="text-lg font-semibold text-primary">🩺 Synoptic View – Quick Snapshot</h3>
+          <p className="text-xs text-muted-foreground mt-1">
+            Five short questions to give your support worker a fast understanding of your past and current picture. Optional – fill in what you feel comfortable sharing.
+          </p>
+        </div>
+        <div className="space-y-3">
+          {synopticQuestions.map((q) => (
+            <div key={q.id} className="space-y-1">
+              <label htmlFor={q.id} className="block text-sm font-medium text-foreground">
+                {q.label}
+              </label>
+              <textarea
+                id={q.id}
+                value={synoptic[q.id] || ""}
+                onChange={(e) => { setSynoptic((p) => ({ ...p, [q.id]: e.target.value })); setReport(null); }}
+                placeholder={q.placeholder}
+                rows={2}
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="flex items-center gap-4 flex-wrap">
         <button
           onClick={generateReport}
