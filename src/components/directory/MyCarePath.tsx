@@ -128,11 +128,13 @@ const synopticQuestions = [
 interface ReportData {
   selectedNeeds: string[];
   matchedCategories: { name: string; services: { name: string; type: string | null; contacts: string }[] }[];
+  synoptic: { question: string; answer: string }[];
   date: string;
 }
 
 export function MyCarePath() {
   const [checked, setChecked] = useState<Set<string>>(new Set());
+  const [synoptic, setSynoptic] = useState<Record<string, string>>({});
   const [report, setReport] = useState<ReportData | null>(null);
   const [hint, setHint] = useState("Select at least one need above");
   const { data: categories = [] } = useCategories();
