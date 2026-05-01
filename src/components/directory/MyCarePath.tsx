@@ -94,11 +94,35 @@ const carePathNeeds: CareNeedGroup[] = [
     ],
   },
   {
+    label: "Physical Health",
+    needs: [
+      { id: "ph_chronic", label: "Chronic physical health condition (e.g. diabetes, COPD, heart disease)", categoryNames: ["Physical Health & Wellbeing"] },
+      { id: "ph_pain", label: "Persistent or chronic pain", categoryNames: ["Physical Health & Wellbeing"] },
+      { id: "ph_sleep", label: "Sleep problems / insomnia", categoryNames: ["Physical Health & Wellbeing"] },
+      { id: "ph_weight", label: "Weight, nutrition or eating concerns", categoryNames: ["Physical Health & Wellbeing"] },
+      { id: "ph_activity", label: "Low physical activity / sedentary lifestyle", categoryNames: ["Physical Health & Wellbeing"] },
+      { id: "ph_smoking", label: "Smoking, vaping or wants to quit", categoryNames: ["Physical Health & Wellbeing"] },
+      { id: "ph_smi_check", label: "Overdue annual SMI physical health check", categoryNames: ["Physical Health & Wellbeing"] },
+      { id: "ph_dental", label: "Dental or oral health needs", categoryNames: ["Physical Health & Wellbeing"] },
+      { id: "ph_sexual", label: "Sexual health concerns", categoryNames: ["Physical Health & Wellbeing"] },
+      { id: "ph_pregnancy", label: "Pregnancy or postnatal physical health", categoryNames: ["Physical Health & Wellbeing"] },
+    ],
+  },
+  {
     label: "Staff Wellbeing",
     needs: [
       { id: "awp_staff", label: "AWP staff wellbeing support", categoryNames: ["AWP Staff Wellbeing"] },
     ],
   },
+];
+
+// Synoptic clinical questions — free-text responses
+const synopticQuestions = [
+  { id: "syn_diagnosis", label: "Previous and current mental health diagnoses (if any)", placeholder: "e.g. Depression (2019), current GAD diagnosis…" },
+  { id: "syn_therapy", label: "Have you had therapy or psychological support before? What kind, and was it helpful?", placeholder: "e.g. CBT in 2021 — helpful for anxiety; counselling at university…" },
+  { id: "syn_coping", label: "What coping mechanisms or strategies do you use (helpful or unhelpful)?", placeholder: "e.g. walking, journalling, breathing exercises; also drinking when stressed…" },
+  { id: "syn_support", label: "Who is in your current support network (family, friends, professionals)?", placeholder: "e.g. partner, GP, sister, peer support group…" },
+  { id: "syn_goals", label: "What would you like to achieve? What are your goals for support?", placeholder: "e.g. manage anxiety, return to work, improve sleep, rebuild confidence…" },
 ];
 
 interface ReportData {
