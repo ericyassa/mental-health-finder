@@ -120,6 +120,7 @@ const carePathNeeds: CareNeedGroup[] = [
 // Synoptic clinical questions — free-text responses
 const synopticQuestions = [
   { id: "syn_diagnosis", label: "Previous and current mental health diagnoses (if any)", placeholder: "e.g. Depression (2019), current GAD diagnosis…" },
+  { id: "syn_current_issues", label: "What are the current issues / main concerns right now? (brief summary)", placeholder: "e.g. Low mood for 3 months, poor sleep, isolating from family, struggling at work…" },
   { id: "syn_therapy", label: "Have you had therapy or psychological support before? What kind, and was it helpful?", placeholder: "e.g. CBT in 2021 — helpful for anxiety; counselling at university…" },
   { id: "syn_coping", label: "What coping mechanisms or strategies do you use (helpful or unhelpful)?", placeholder: "e.g. walking, journalling, breathing exercises; also drinking when stressed…" },
   { id: "syn_support", label: "Who is in your current support network (family, friends, professionals)?", placeholder: "e.g. partner, GP, sister, peer support group…" },
