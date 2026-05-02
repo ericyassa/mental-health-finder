@@ -1,7 +1,8 @@
-import { useState, useMemo } from "react";
-import { ClipboardList, Printer, Copy, AlertCircle } from "lucide-react";
-import { useCategories, useServices, useServiceContacts } from "@/hooks/useDirectoryData";
-import type { Category } from "@/hooks/useDirectoryData";
+import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import { ClipboardList, Printer, Copy, Sparkles, Loader2 } from "lucide-react";
+import { useCategories } from "@/hooks/useDirectoryData";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CareNeed {
   id: string;
@@ -119,6 +120,7 @@ const carePathNeeds: CareNeedGroup[] = [
 // Synoptic clinical questions — free-text responses
 const synopticQuestions = [
   { id: "syn_diagnosis", label: "Previous and current mental health diagnoses (if any)", placeholder: "e.g. Depression (2019), current GAD diagnosis…" },
+  { id: "syn_current_issues", label: "What are the current issues / main concerns right now? (brief summary)", placeholder: "e.g. Low mood for 3 months, poor sleep, isolating from family, struggling at work…" },
   { id: "syn_therapy", label: "Have you had therapy or psychological support before? What kind, and was it helpful?", placeholder: "e.g. CBT in 2021 — helpful for anxiety; counselling at university…" },
   { id: "syn_coping", label: "What coping mechanisms or strategies do you use (helpful or unhelpful)?", placeholder: "e.g. walking, journalling, breathing exercises; also drinking when stressed…" },
   { id: "syn_support", label: "Who is in your current support network (family, friends, professionals)?", placeholder: "e.g. partner, GP, sister, peer support group…" },
@@ -137,6 +139,9 @@ export function MyCarePath() {
   const [synoptic, setSynoptic] = useState<Record<string, string>>({});
   const [report, setReport] = useState<ReportData | null>(null);
   const [hint, setHint] = useState("Select at least one need above");
+  const [aiRecommendation, setAiRecommendation] = useState<string>("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string>("");
   const { data: categories = [] } = useCategories();
 
   const toggle = (id: string) => {
@@ -146,7 +151,27 @@ export function MyCarePath() {
       return next;
     });
     setReport(null);
+    setAiRecommendation("");
+    setAiError("");
     setHint("Select at least one need above");
+  };
+
+  const fetchAiRecommendation = async (needs: string[], synopticAnswers: { question: string; answer: string }[]) => {
+    setAiLoading(true);
+    setAiError("");
+    setAiRecommendation("");
+    try {
+      const { data, error } = await supabase.functions.invoke("care-recommendation", {
+        body: { needs, synoptic: synopticAnswers },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setAiRecommendation(data?.recommendation || "");
+    } catch (e: any) {
+      setAiError(e?.message || "Could not generate AI recommendation. Please try again.");
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const generateReport = () => {
@@ -168,7 +193,6 @@ export function MyCarePath() {
       });
     });
 
-    // Match category names to actual categories
     const matchedCats = categories.filter((c) => matchedCategoryNames.has(c.name));
 
     const now = new Date();
@@ -185,6 +209,9 @@ export function MyCarePath() {
       synoptic: synopticAnswers,
       date: dateStr,
     });
+
+    // Kick off AI recommendation in parallel
+    fetchAiRecommendation(selectedNeeds, synopticAnswers);
   };
 
   const copyReport = () => {
@@ -192,9 +219,11 @@ export function MyCarePath() {
     const synopticBlock = report.synoptic.length > 0
       ? `\n\nSynoptic View:\n${report.synoptic.map((s) => `• ${s.question}\n   ${s.answer}`).join("\n")}`
       : "";
-    const text = `My Care Path – Summary Report\nGenerated: ${report.date}\n\nIdentified Needs:\n${report.selectedNeeds.map((n) => `• ${n}`).join("\n")}\n\nMatched Categories:\n${report.matchedCategories.map((c) => `• ${c.name}`).join("\n")}${synopticBlock}\n\nThis report was generated from the Bristol Mental Health Signposting Directory.`;
+    const aiBlock = aiRecommendation ? `\n\n--- Suggested Interim Plan (AI-generated) ---\n${aiRecommendation}` : "";
+    const text = `My Care Path – Summary Report\nGenerated: ${report.date}\n\nIdentified Needs:\n${report.selectedNeeds.map((n) => `• ${n}`).join("\n")}\n\nMatched Categories:\n${report.matchedCategories.map((c) => `• ${c.name}`).join("\n")}${synopticBlock}${aiBlock}\n\nThis report was generated from the Bristol Mental Health Signposting Directory. Not a clinical assessment.`;
     navigator.clipboard.writeText(text);
   };
+
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -249,7 +278,7 @@ export function MyCarePath() {
               <textarea
                 id={q.id}
                 value={synoptic[q.id] || ""}
-                onChange={(e) => { setSynoptic((p) => ({ ...p, [q.id]: e.target.value })); setReport(null); }}
+                onChange={(e) => { setSynoptic((p) => ({ ...p, [q.id]: e.target.value })); setReport(null); setAiRecommendation(""); setAiError(""); }}
                 placeholder={q.placeholder}
                 rows={2}
                 className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -316,6 +345,39 @@ export function MyCarePath() {
               </ul>
             </div>
           )}
+
+          {/* AI-generated interim plan */}
+          <div className="rounded-lg border-2 border-primary/40 bg-primary/5 p-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <h4 className="text-sm font-bold text-primary">Suggested Interim Plan – While You Wait</h4>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              AI-generated suggestions based on what you shared. Not clinical advice — a starting point you can use today.
+            </p>
+            {aiLoading && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Crafting your personalised suggestions…
+              </div>
+            )}
+            {aiError && (
+              <div className="text-sm text-destructive py-2">
+                {aiError}
+                <button
+                  onClick={() => fetchAiRecommendation(report.selectedNeeds, report.synoptic)}
+                  className="ml-2 underline hover:no-underline"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+            {aiRecommendation && !aiLoading && (
+              <div className="prose prose-sm max-w-none text-foreground prose-headings:text-primary prose-headings:font-semibold prose-headings:text-sm prose-headings:mt-3 prose-headings:mb-1 prose-p:my-1 prose-ul:my-1 prose-li:my-0.5">
+                <ReactMarkdown>{aiRecommendation}</ReactMarkdown>
+              </div>
+            )}
+          </div>
 
           <div className="flex gap-3 flex-wrap pt-2">
             <button
