@@ -278,7 +278,7 @@ export function MyCarePath() {
               <textarea
                 id={q.id}
                 value={synoptic[q.id] || ""}
-                onChange={(e) => { setSynoptic((p) => ({ ...p, [q.id]: e.target.value })); setReport(null); }}
+                onChange={(e) => { setSynoptic((p) => ({ ...p, [q.id]: e.target.value })); setReport(null); setAiRecommendation(""); setAiError(""); }}
                 placeholder={q.placeholder}
                 rows={2}
                 className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
