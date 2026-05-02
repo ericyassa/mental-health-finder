@@ -1,7 +1,8 @@
-import { useState, useMemo } from "react";
-import { ClipboardList, Printer, Copy, AlertCircle } from "lucide-react";
-import { useCategories, useServices, useServiceContacts } from "@/hooks/useDirectoryData";
-import type { Category } from "@/hooks/useDirectoryData";
+import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import { ClipboardList, Printer, Copy, Sparkles, Loader2 } from "lucide-react";
+import { useCategories } from "@/hooks/useDirectoryData";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CareNeed {
   id: string;
