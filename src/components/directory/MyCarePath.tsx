@@ -346,6 +346,39 @@ export function MyCarePath() {
             </div>
           )}
 
+          {/* AI-generated interim plan */}
+          <div className="rounded-lg border-2 border-primary/40 bg-primary/5 p-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <h4 className="text-sm font-bold text-primary">Suggested Interim Plan – While You Wait</h4>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              AI-generated suggestions based on what you shared. Not clinical advice — a starting point you can use today.
+            </p>
+            {aiLoading && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Crafting your personalised suggestions…
+              </div>
+            )}
+            {aiError && (
+              <div className="text-sm text-destructive py-2">
+                {aiError}
+                <button
+                  onClick={() => fetchAiRecommendation(report.selectedNeeds, report.synoptic)}
+                  className="ml-2 underline hover:no-underline"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+            {aiRecommendation && !aiLoading && (
+              <div className="prose prose-sm max-w-none text-foreground prose-headings:text-primary prose-headings:font-semibold prose-headings:text-sm prose-headings:mt-3 prose-headings:mb-1 prose-p:my-1 prose-ul:my-1 prose-li:my-0.5">
+                <ReactMarkdown>{aiRecommendation}</ReactMarkdown>
+              </div>
+            )}
+          </div>
+
           <div className="flex gap-3 flex-wrap pt-2">
             <button
               onClick={() => window.print()}
