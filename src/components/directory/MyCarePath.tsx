@@ -139,6 +139,9 @@ export function MyCarePath() {
   const [synoptic, setSynoptic] = useState<Record<string, string>>({});
   const [report, setReport] = useState<ReportData | null>(null);
   const [hint, setHint] = useState("Select at least one need above");
+  const [aiRecommendation, setAiRecommendation] = useState<string>("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string>("");
   const { data: categories = [] } = useCategories();
 
   const toggle = (id: string) => {
@@ -148,7 +151,27 @@ export function MyCarePath() {
       return next;
     });
     setReport(null);
+    setAiRecommendation("");
+    setAiError("");
     setHint("Select at least one need above");
+  };
+
+  const fetchAiRecommendation = async (needs: string[], synopticAnswers: { question: string; answer: string }[]) => {
+    setAiLoading(true);
+    setAiError("");
+    setAiRecommendation("");
+    try {
+      const { data, error } = await supabase.functions.invoke("care-recommendation", {
+        body: { needs, synoptic: synopticAnswers },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setAiRecommendation(data?.recommendation || "");
+    } catch (e: any) {
+      setAiError(e?.message || "Could not generate AI recommendation. Please try again.");
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const generateReport = () => {
@@ -170,7 +193,6 @@ export function MyCarePath() {
       });
     });
 
-    // Match category names to actual categories
     const matchedCats = categories.filter((c) => matchedCategoryNames.has(c.name));
 
     const now = new Date();
@@ -187,6 +209,9 @@ export function MyCarePath() {
       synoptic: synopticAnswers,
       date: dateStr,
     });
+
+    // Kick off AI recommendation in parallel
+    fetchAiRecommendation(selectedNeeds, synopticAnswers);
   };
 
   const copyReport = () => {
@@ -194,9 +219,11 @@ export function MyCarePath() {
     const synopticBlock = report.synoptic.length > 0
       ? `\n\nSynoptic View:\n${report.synoptic.map((s) => `• ${s.question}\n   ${s.answer}`).join("\n")}`
       : "";
-    const text = `My Care Path – Summary Report\nGenerated: ${report.date}\n\nIdentified Needs:\n${report.selectedNeeds.map((n) => `• ${n}`).join("\n")}\n\nMatched Categories:\n${report.matchedCategories.map((c) => `• ${c.name}`).join("\n")}${synopticBlock}\n\nThis report was generated from the Bristol Mental Health Signposting Directory.`;
+    const aiBlock = aiRecommendation ? `\n\n--- Suggested Interim Plan (AI-generated) ---\n${aiRecommendation}` : "";
+    const text = `My Care Path – Summary Report\nGenerated: ${report.date}\n\nIdentified Needs:\n${report.selectedNeeds.map((n) => `• ${n}`).join("\n")}\n\nMatched Categories:\n${report.matchedCategories.map((c) => `• ${c.name}`).join("\n")}${synopticBlock}${aiBlock}\n\nThis report was generated from the Bristol Mental Health Signposting Directory. Not a clinical assessment.`;
     navigator.clipboard.writeText(text);
   };
+
 
   return (
     <div className="space-y-6 max-w-3xl">
