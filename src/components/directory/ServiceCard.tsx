@@ -1,4 +1,4 @@
-import { ExternalLink, Phone, Mail, Globe, MapPin, Info } from "lucide-react";
+import { ExternalLink, Phone, Mail, Globe, MapPin, Info, ClipboardList } from "lucide-react";
 import type { Service, ServiceContact } from "@/hooks/useDirectoryData";
 
 interface ServiceCardProps {
@@ -14,8 +14,22 @@ const contactIcons: Record<string, React.ReactNode> = {
 };
 
 export function ServiceCard({ service, contacts }: ServiceCardProps) {
+  const isClinicalTool = service.type?.toLowerCase().includes("clinical tool");
+
   return (
-    <div className="w-full overflow-hidden rounded-lg border border-border bg-card p-4 shadow-sm transition-all hover:border-accent hover:shadow-md">
+    <div
+      className={
+        isClinicalTool
+          ? "w-full overflow-hidden rounded-lg border-2 border-primary bg-primary/5 p-4 shadow-md transition-all hover:shadow-lg ring-1 ring-primary/20"
+          : "w-full overflow-hidden rounded-lg border border-border bg-card p-4 shadow-sm transition-all hover:border-accent hover:shadow-md"
+      }
+    >
+      {isClinicalTool && (
+        <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-primary-foreground">
+          <ClipboardList className="h-3 w-3" />
+          Clinical Tool · Staff Use
+        </div>
+      )}
       <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           {service.link ? (
@@ -32,7 +46,7 @@ export function ServiceCard({ service, contacts }: ServiceCardProps) {
             <h4 className="break-words text-base font-bold text-primary">{service.name}</h4>
           )}
         </div>
-        {service.type && (
+        {service.type && !isClinicalTool && (
           <span className="max-w-full self-start rounded bg-accent/30 px-2.5 py-0.5 text-xs font-bold leading-snug text-accent-foreground">
             {service.type}
           </span>
