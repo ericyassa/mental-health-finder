@@ -289,6 +289,20 @@ export function MyCarePath() {
         </div>
       </div>
 
+      <div className="flex items-center gap-3 flex-wrap">
+        <label className="text-sm font-medium text-foreground">AI provider:</label>
+        <select
+          value={provider}
+          onChange={(e) => setProvider(e.target.value as typeof provider)}
+          className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+        >
+          <option value="lovable">Lovable AI (default — no key)</option>
+          <option value="openai">OpenAI (needs OPENAI_API_KEY)</option>
+          <option value="gemini">Google Gemini (needs GEMINI_API_KEY)</option>
+          <option value="copilot">Microsoft Copilot / Azure OpenAI</option>
+        </select>
+      </div>
+
       <div className="flex items-center gap-4 flex-wrap">
         <button
           onClick={generateReport}
