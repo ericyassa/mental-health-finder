@@ -163,7 +163,7 @@ export function MyCarePath() {
     setAiRecommendation("");
     try {
       const { data, error } = await supabase.functions.invoke("care-recommendation", {
-        body: { needs, synoptic: synopticAnswers },
+        body: { needs, synoptic: synopticAnswers, provider },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
