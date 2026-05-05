@@ -142,6 +142,7 @@ export function MyCarePath() {
   const [aiRecommendation, setAiRecommendation] = useState<string>("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string>("");
+  const [provider, setProvider] = useState<"lovable" | "openai" | "gemini" | "copilot">("lovable");
   const { data: categories = [] } = useCategories();
 
   const toggle = (id: string) => {
