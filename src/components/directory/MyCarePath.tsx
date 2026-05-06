@@ -142,6 +142,9 @@ export function MyCarePath() {
   const [aiRecommendation, setAiRecommendation] = useState<string>("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string>("");
+  const [wellbeingPlan, setWellbeingPlan] = useState<string>("");
+  const [wellbeingLoading, setWellbeingLoading] = useState(false);
+  const [wellbeingError, setWellbeingError] = useState<string>("");
   const [provider, setProvider] = useState<"lovable" | "openai" | "gemini" | "copilot">("lovable");
   const { data: categories = [] } = useCategories();
 
