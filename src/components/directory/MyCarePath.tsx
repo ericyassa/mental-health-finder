@@ -469,7 +469,7 @@ export function MyCarePath() {
             </div>
           )}
           {wellbeingPlan && (
-            <div className="prose prose-sm max-w-none text-foreground prose-headings:text-primary prose-headings:font-semibold prose-headings:text-sm prose-headings:mt-3 prose-headings:mb-1 prose-p:my-1 prose-ul:my-1 prose-li:my-0.5">
+            <div className="wellbeing-content space-y-4 text-foreground [&_h3]:mt-5 [&_h3]:mb-2 [&_h3]:px-3 [&_h3]:py-2 [&_h3]:rounded-md [&_h3]:bg-primary [&_h3]:text-primary-foreground [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:shadow-sm [&_h3:first-child]:mt-0 [&_p]:text-sm [&_p]:my-1.5 [&_p]:px-1 [&_ul]:my-1.5 [&_ul]:px-1 [&_li]:text-sm [&_li]:my-1 [&_ul]:list-disc [&_ul]:pl-5 [&_strong]:text-primary">
               <ReactMarkdown>{wellbeingPlan}</ReactMarkdown>
             </div>
           )}
