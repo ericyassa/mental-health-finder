@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { needs, synoptic, provider = "lovable" } = await req.json();
+    const { needs, synoptic, provider = "lovable", mode = "interim" } = await req.json();
 
     const needsText = Array.isArray(needs) && needs.length ? needs.map((n: string) => `- ${n}`).join("\n") : "(none ticked)";
     const synopticText = Array.isArray(synoptic) && synoptic.length
