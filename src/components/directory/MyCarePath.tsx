@@ -178,24 +178,35 @@ export function MyCarePath() {
     }
   };
 
-  const fetchWellbeingPlan = async () => {
+  const [consentOpen, setConsentOpen] = useState(false);
+  const [consentShare, setConsentShare] = useState<boolean | null>(null);
+  const [adjustments, setAdjustments] = useState("");
+
+  const openWellbeingPrompt = () => {
     const hasSynoptic = synopticQuestions.some((q) => (synoptic[q.id] || "").trim().length > 0);
     if (checked.size === 0 && !hasSynoptic) {
       setHint("⚠️ Please tick at least one need or fill in a synoptic question");
       return;
     }
+    setConsentShare(null);
+    setAdjustments("");
+    setConsentOpen(true);
+  };
+
+  const fetchWellbeingPlan = async () => {
     const selectedNeeds: string[] = [];
     carePathNeeds.forEach((g) => g.needs.forEach((n) => { if (checked.has(n.id)) selectedNeeds.push(n.label); }));
     const synopticAnswers = synopticQuestions
       .map((q) => ({ question: q.label, answer: (synoptic[q.id] || "").trim() }))
       .filter((s) => s.answer.length > 0);
 
+    setConsentOpen(false);
     setWellbeingLoading(true);
     setWellbeingError("");
     setWellbeingPlan("");
     try {
       const { data, error } = await supabase.functions.invoke("care-recommendation", {
-        body: { needs: selectedNeeds, synoptic: synopticAnswers, provider, mode: "wellbeing" },
+        body: { needs: selectedNeeds, synoptic: synopticAnswers, provider, mode: "wellbeing", consentShare, adjustments },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
