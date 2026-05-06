@@ -1,8 +1,10 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { ClipboardList, Printer, Copy, Sparkles, Loader2 } from "lucide-react";
+import { ClipboardList, Printer, Copy, Sparkles, Loader2, ShieldCheck } from "lucide-react";
 import { useCategories } from "@/hooks/useDirectoryData";
 import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface CareNeed {
   id: string;
@@ -178,24 +180,35 @@ export function MyCarePath() {
     }
   };
 
-  const fetchWellbeingPlan = async () => {
+  const [consentOpen, setConsentOpen] = useState(false);
+  const [consentShare, setConsentShare] = useState<boolean | null>(null);
+  const [adjustments, setAdjustments] = useState("");
+
+  const openWellbeingPrompt = () => {
     const hasSynoptic = synopticQuestions.some((q) => (synoptic[q.id] || "").trim().length > 0);
     if (checked.size === 0 && !hasSynoptic) {
       setHint("⚠️ Please tick at least one need or fill in a synoptic question");
       return;
     }
+    setConsentShare(null);
+    setAdjustments("");
+    setConsentOpen(true);
+  };
+
+  const fetchWellbeingPlan = async () => {
     const selectedNeeds: string[] = [];
     carePathNeeds.forEach((g) => g.needs.forEach((n) => { if (checked.has(n.id)) selectedNeeds.push(n.label); }));
     const synopticAnswers = synopticQuestions
       .map((q) => ({ question: q.label, answer: (synoptic[q.id] || "").trim() }))
       .filter((s) => s.answer.length > 0);
 
+    setConsentOpen(false);
     setWellbeingLoading(true);
     setWellbeingError("");
     setWellbeingPlan("");
     try {
       const { data, error } = await supabase.functions.invoke("care-recommendation", {
-        body: { needs: selectedNeeds, synoptic: synopticAnswers, provider, mode: "wellbeing" },
+        body: { needs: selectedNeeds, synoptic: synopticAnswers, provider, mode: "wellbeing", consentShare, adjustments },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -350,7 +363,7 @@ export function MyCarePath() {
 
       <div className="flex items-center gap-4 flex-wrap">
         <button
-          onClick={fetchWellbeingPlan}
+          onClick={openWellbeingPrompt}
           disabled={wellbeingLoading}
           className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition-colors disabled:opacity-60"
         >
@@ -358,12 +371,73 @@ export function MyCarePath() {
           Personal Wellbeing Plan
         </button>
         <span className="text-xs text-muted-foreground">
-          AI-generated from your synoptic answers — re-click to regenerate.
+          AI-generated — you'll be asked about consent & adjustments before generating.
         </span>
       </div>
 
+      {/* Consent & Adjustments Dialog */}
+      <Dialog open={consentOpen} onOpenChange={setConsentOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" /> Consent & Adjustments
+            </DialogTitle>
+            <DialogDescription>
+              Before we generate the wellbeing plan, please confirm a couple of things with the service user.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground">
+                Do you consent to this information being shared with professionals (GP, care team, social worker)?
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={consentShare === true ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setConsentShare(true)}
+                >
+                  Yes, I consent
+                </Button>
+                <Button
+                  type="button"
+                  variant={consentShare === false ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setConsentShare(false)}
+                >
+                  No, do not share
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="adjustments" className="block text-sm font-medium text-foreground">
+                Any reasonable adjustments needed? <span className="text-muted-foreground font-normal">(e.g. easy-read, interpreter, sensory, communication preferences)</span>
+              </label>
+              <textarea
+                id="adjustments"
+                value={adjustments}
+                onChange={(e) => setAdjustments(e.target.value)}
+                placeholder="Optional — leave blank if none"
+                rows={3}
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConsentOpen(false)}>Cancel</Button>
+            <Button onClick={fetchWellbeingPlan} disabled={consentShare === null}>
+              <Sparkles className="h-4 w-4" /> Generate Plan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {(wellbeingPlan || wellbeingError) && (
-        <div className="rounded-lg border-2 border-accent/40 bg-accent/5 p-5 shadow-sm space-y-2 print:shadow-none" id="wellbeing-plan">
+        <div className="rounded-lg border-2 border-accent/40 bg-accent/5 p-6 shadow-sm space-y-3 print:shadow-none" id="wellbeing-plan">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <h3 className="text-lg font-bold text-primary flex items-center gap-2">
               <Sparkles className="h-4 w-4" /> Personal Wellbeing Plan
@@ -395,7 +469,7 @@ export function MyCarePath() {
             </div>
           )}
           {wellbeingPlan && (
-            <div className="prose prose-sm max-w-none text-foreground prose-headings:text-primary prose-headings:font-semibold prose-headings:text-sm prose-headings:mt-3 prose-headings:mb-1 prose-p:my-1 prose-ul:my-1 prose-li:my-0.5">
+            <div className="wellbeing-content space-y-4 text-foreground [&_h3]:mt-5 [&_h3]:mb-2 [&_h3]:px-3 [&_h3]:py-2 [&_h3]:rounded-md [&_h3]:bg-primary [&_h3]:text-primary-foreground [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:shadow-sm [&_h3:first-child]:mt-0 [&_p]:text-sm [&_p]:my-1.5 [&_p]:px-1 [&_ul]:my-1.5 [&_ul]:px-1 [&_li]:text-sm [&_li]:my-1 [&_ul]:list-disc [&_ul]:pl-5 [&_strong]:text-primary">
               <ReactMarkdown>{wellbeingPlan}</ReactMarkdown>
             </div>
           )}
