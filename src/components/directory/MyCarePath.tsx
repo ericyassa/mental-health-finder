@@ -1,8 +1,10 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { ClipboardList, Printer, Copy, Sparkles, Loader2 } from "lucide-react";
+import { ClipboardList, Printer, Copy, Sparkles, Loader2, ShieldCheck } from "lucide-react";
 import { useCategories } from "@/hooks/useDirectoryData";
 import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface CareNeed {
   id: string;
