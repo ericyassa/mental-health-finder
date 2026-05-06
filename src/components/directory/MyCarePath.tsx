@@ -178,6 +178,35 @@ export function MyCarePath() {
     }
   };
 
+  const fetchWellbeingPlan = async () => {
+    const hasSynoptic = synopticQuestions.some((q) => (synoptic[q.id] || "").trim().length > 0);
+    if (checked.size === 0 && !hasSynoptic) {
+      setHint("⚠️ Please tick at least one need or fill in a synoptic question");
+      return;
+    }
+    const selectedNeeds: string[] = [];
+    carePathNeeds.forEach((g) => g.needs.forEach((n) => { if (checked.has(n.id)) selectedNeeds.push(n.label); }));
+    const synopticAnswers = synopticQuestions
+      .map((q) => ({ question: q.label, answer: (synoptic[q.id] || "").trim() }))
+      .filter((s) => s.answer.length > 0);
+
+    setWellbeingLoading(true);
+    setWellbeingError("");
+    setWellbeingPlan("");
+    try {
+      const { data, error } = await supabase.functions.invoke("care-recommendation", {
+        body: { needs: selectedNeeds, synoptic: synopticAnswers, provider, mode: "wellbeing" },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setWellbeingPlan(data?.recommendation || "");
+    } catch (e: any) {
+      setWellbeingError(e?.message || "Could not generate wellbeing plan. Please try again.");
+    } finally {
+      setWellbeingLoading(false);
+    }
+  };
+
   const generateReport = () => {
     const hasSynoptic = synopticQuestions.some((q) => (synoptic[q.id] || "").trim().length > 0);
     if (checked.size === 0 && !hasSynoptic) {
