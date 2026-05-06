@@ -363,7 +363,7 @@ export function MyCarePath() {
 
       <div className="flex items-center gap-4 flex-wrap">
         <button
-          onClick={fetchWellbeingPlan}
+          onClick={openWellbeingPrompt}
           disabled={wellbeingLoading}
           className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition-colors disabled:opacity-60"
         >
@@ -371,12 +371,73 @@ export function MyCarePath() {
           Personal Wellbeing Plan
         </button>
         <span className="text-xs text-muted-foreground">
-          AI-generated from your synoptic answers — re-click to regenerate.
+          AI-generated — you'll be asked about consent & adjustments before generating.
         </span>
       </div>
 
+      {/* Consent & Adjustments Dialog */}
+      <Dialog open={consentOpen} onOpenChange={setConsentOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" /> Consent & Adjustments
+            </DialogTitle>
+            <DialogDescription>
+              Before we generate the wellbeing plan, please confirm a couple of things with the service user.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground">
+                Do you consent to this information being shared with professionals (GP, care team, social worker)?
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={consentShare === true ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setConsentShare(true)}
+                >
+                  Yes, I consent
+                </Button>
+                <Button
+                  type="button"
+                  variant={consentShare === false ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setConsentShare(false)}
+                >
+                  No, do not share
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="adjustments" className="block text-sm font-medium text-foreground">
+                Any reasonable adjustments needed? <span className="text-muted-foreground font-normal">(e.g. easy-read, interpreter, sensory, communication preferences)</span>
+              </label>
+              <textarea
+                id="adjustments"
+                value={adjustments}
+                onChange={(e) => setAdjustments(e.target.value)}
+                placeholder="Optional — leave blank if none"
+                rows={3}
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConsentOpen(false)}>Cancel</Button>
+            <Button onClick={fetchWellbeingPlan} disabled={consentShare === null}>
+              <Sparkles className="h-4 w-4" /> Generate Plan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {(wellbeingPlan || wellbeingError) && (
-        <div className="rounded-lg border-2 border-accent/40 bg-accent/5 p-5 shadow-sm space-y-2 print:shadow-none" id="wellbeing-plan">
+        <div className="rounded-lg border-2 border-accent/40 bg-accent/5 p-6 shadow-sm space-y-3 print:shadow-none" id="wellbeing-plan">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <h3 className="text-lg font-bold text-primary flex items-center gap-2">
               <Sparkles className="h-4 w-4" /> Personal Wellbeing Plan
