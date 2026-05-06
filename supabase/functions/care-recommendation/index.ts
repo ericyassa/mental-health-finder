@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { needs, synoptic, provider = "lovable" } = await req.json();
+    const { needs, synoptic, provider = "lovable", mode = "interim" } = await req.json();
 
     const needsText = Array.isArray(needs) && needs.length ? needs.map((n: string) => `- ${n}`).join("\n") : "(none ticked)";
     const synopticText = Array.isArray(synoptic) && synoptic.length
@@ -25,7 +25,11 @@ Deno.serve(async (req) => {
 
     const systemPrompt = `You are a UK mental health support assistant helping staff produce a SHORT, practical interim plan for a service user who may wait months for professional help. Be succinct, warm, non-clinical, and signpost to free, evidence-informed UK self-help (NHS Every Mind Matters, Mind, Samaritans 116 123, Shout text 85258, SilverCloud, Hub of Hope, NHS Talking Therapies self-referral, etc.). Never diagnose. If risk/danger to self or others is mentioned, lead with crisis advice (999 / 111 option 2 / Samaritans / call police if danger to others).`;
 
-    const userPrompt = `Identified needs:\n${needsText}\n\nSynoptic snapshot:\n${synopticText}\n\nProduce a CONCISE interim plan with these short sections (use markdown headings, max ~180 words total):\n### 🌱 Recommended Starting Point\n(2-3 sentences, creative but realistic)\n### 🧰 Self-Help While Waiting\n(3-5 short bullet points — apps, websites, helplines, daily habits)\n### 📞 If Things Get Worse\n(1-2 lines on crisis routes)\n### ✅ First Small Step Today\n(1 sentence — one tiny action)`;
+    const interimPrompt = `Identified needs:\n${needsText}\n\nSynoptic snapshot:\n${synopticText}\n\nProduce a CONCISE interim plan with these short sections (use markdown headings, max ~180 words total):\n### 🌱 Recommended Starting Point\n(2-3 sentences, creative but realistic)\n### 🧰 Self-Help While Waiting\n(3-5 short bullet points — apps, websites, helplines, daily habits)\n### 📞 If Things Get Worse\n(1-2 lines on crisis routes)\n### ✅ First Small Step Today\n(1 sentence — one tiny action)`;
+
+    const wellbeingPrompt = `Identified needs:\n${needsText}\n\nSynoptic snapshot:\n${synopticText}\n\nProduce a PERSONAL WELLBEING PLAN written in the first person ("I"), creative but grounded in the synoptic content. Keep it concise and scannable for a mental health nurse — aim for ~250 words total. Use these EXACT markdown headings in this order, each followed by 1-3 short bullet points or 1-2 sentences:\n\n### 💬 What Matters To You?\n### 📖 What has happened? What is the situation?\n### 🎯 What are your long term goals?\n### 🧠 Mental Health Goals and Agreed Actions\n### 🛟 Personal Safety Goals\n### 💪 Physical Health Goals\n### ⚠️ Early Warning Signs\n### 🤝 What Support Works For You\n### 👤 Main Support / Next of Kin (NOK)\n\nIf the synoptic does not mention a NOK, write "To be confirmed with service user". Do not invent clinical diagnoses. Keep tone warm and recovery-focused.`;
+
+    const userPrompt = mode === "wellbeing" ? wellbeingPrompt : interimPrompt;
 
     const messages = [
       { role: "system", content: systemPrompt },
