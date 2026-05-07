@@ -681,11 +681,18 @@ export function MyCarePath() {
               Print Report
             </button>
             <button
-              onClick={downloadReport}
+              onClick={downloadReportPdf}
               className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition-colors"
             >
+              <FileDown className="h-4 w-4" />
+              Download PDF
+            </button>
+            <button
+              onClick={downloadReport}
+              className="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground hover:bg-secondary/80 transition-colors"
+            >
               <Download className="h-4 w-4" />
-              Download Report
+              Download .txt
             </button>
             <button
               onClick={copyReport}
