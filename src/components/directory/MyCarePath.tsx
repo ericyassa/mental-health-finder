@@ -136,19 +136,46 @@ interface ReportData {
   date: string;
 }
 
+// Module-level cache so navigating away and back preserves clinician work
+const cache: {
+  checked: Set<string>;
+  synoptic: Record<string, string>;
+  report: ReportData | null;
+  aiRecommendation: string;
+  wellbeingPlan: string;
+  adjustments: string;
+  consentShare: boolean | null;
+} = {
+  checked: new Set(),
+  synoptic: {},
+  report: null,
+  aiRecommendation: "",
+  wellbeingPlan: "",
+  adjustments: "",
+  consentShare: null,
+};
+
 export function MyCarePath() {
-  const [checked, setChecked] = useState<Set<string>>(new Set());
-  const [synoptic, setSynoptic] = useState<Record<string, string>>({});
-  const [report, setReport] = useState<ReportData | null>(null);
+  const [checked, setChecked] = useState<Set<string>>(cache.checked);
+  const [synoptic, setSynoptic] = useState<Record<string, string>>(cache.synoptic);
+  const [report, setReport] = useState<ReportData | null>(cache.report);
   const [hint, setHint] = useState("Select at least one need above");
-  const [aiRecommendation, setAiRecommendation] = useState<string>("");
+  const [aiRecommendation, setAiRecommendation] = useState<string>(cache.aiRecommendation);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string>("");
-  const [wellbeingPlan, setWellbeingPlan] = useState<string>("");
+  const [wellbeingPlan, setWellbeingPlan] = useState<string>(cache.wellbeingPlan);
   const [wellbeingLoading, setWellbeingLoading] = useState(false);
   const [wellbeingError, setWellbeingError] = useState<string>("");
-  const [provider, setProvider] = useState<"lovable" | "openai" | "gemini" | "copilot">("lovable");
+  const provider = "lovable" as const;
   const { data: categories = [] } = useCategories();
+
+  // Sync state to module cache so it persists across unmount
+  useEffect(() => { cache.checked = checked; }, [checked]);
+  useEffect(() => { cache.synoptic = synoptic; }, [synoptic]);
+  useEffect(() => { cache.report = report; }, [report]);
+  useEffect(() => { cache.aiRecommendation = aiRecommendation; }, [aiRecommendation]);
+  useEffect(() => { cache.wellbeingPlan = wellbeingPlan; }, [wellbeingPlan]);
+
 
   const toggle = (id: string) => {
     setChecked((prev) => {
