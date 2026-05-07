@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { ClipboardList, Printer, Copy, Sparkles, Loader2, ShieldCheck, Download, RotateCcw } from "lucide-react";
+import jsPDF from "jspdf";
+import { ClipboardList, Printer, Copy, Sparkles, Loader2, ShieldCheck, Download, RotateCcw, Stethoscope, FileText, HeartPulse, ClipboardCheck, ListChecks, FileDown } from "lucide-react";
 import { useCategories } from "@/hooks/useDirectoryData";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -109,12 +110,6 @@ const carePathNeeds: CareNeedGroup[] = [
       { id: "ph_dental", label: "Dental or oral health needs", categoryNames: ["Physical Health & Wellbeing"] },
       { id: "ph_sexual", label: "Sexual health concerns", categoryNames: ["Physical Health & Wellbeing"] },
       { id: "ph_pregnancy", label: "Pregnancy or postnatal physical health", categoryNames: ["Physical Health & Wellbeing"] },
-    ],
-  },
-  {
-    label: "Staff Wellbeing",
-    needs: [
-      { id: "awp_staff", label: "AWP staff wellbeing support", categoryNames: ["AWP Staff Wellbeing"] },
     ],
   },
 ];
@@ -326,12 +321,69 @@ export function MyCarePath() {
     URL.revokeObjectURL(url);
   };
 
+  const downloadPdf = (title: string, body: string, filename: string) => {
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const margin = 40;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const maxWidth = pageWidth - margin * 2;
+    let y = margin;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(40, 90, 130);
+    doc.text(title, margin, y);
+    y += 22;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(120);
+    doc.text(`Generated: ${new Date().toLocaleString("en-GB")} • Bristol MH Directory`, margin, y);
+    y += 18;
+    doc.setDrawColor(200);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 14;
+
+    doc.setTextColor(30);
+    const lines = body.replace(/\*\*/g, "").split("\n");
+    for (const raw of lines) {
+      const line = raw.replace(/^###\s*/, "").replace(/^##\s*/, "").replace(/^#\s*/, "");
+      const isHeading = /^###\s|^##\s|^#\s/.test(raw) || /^\d+\.\s+[A-Z]/.test(raw.trim());
+      doc.setFont("helvetica", isHeading ? "bold" : "normal");
+      doc.setFontSize(isHeading ? 12 : 10);
+      doc.setTextColor(isHeading ? 40 : 30, isHeading ? 90 : 30, isHeading ? 130 : 30);
+      const wrapped = doc.splitTextToSize(line || " ", maxWidth);
+      for (const w of wrapped) {
+        if (y > pageHeight - margin) { doc.addPage(); y = margin; }
+        doc.text(w, margin, y);
+        y += isHeading ? 16 : 13;
+      }
+      if (isHeading) y += 2;
+    }
+
+    doc.save(filename);
+  };
+
+  const downloadReportPdf = () => {
+    if (!report) return;
+    const body = buildReportText();
+    downloadPdf("Clinical Summary Report", body, `clinical-summary-${new Date().toISOString().slice(0, 10)}.pdf`);
+  };
+
+  const downloadWellbeingPdf = () => {
+    if (!wellbeingPlan) return;
+    downloadPdf("Personal Wellbeing Plan (PWP)", wellbeingPlan, `personal-wellbeing-plan-${new Date().toISOString().slice(0, 10)}.pdf`);
+  };
+
 
 
   return (
     <div className="space-y-6 max-w-3xl">
       <div className="flex items-center justify-between gap-3 border-b-[3px] border-b-accent pb-2 flex-wrap">
-        <h2 className="text-2xl font-bold text-primary">📋 My Care Path</h2>
+        <h2 className="text-2xl font-bold text-primary flex items-center gap-2">
+          <ClipboardCheck className="h-6 w-6" />
+          My Care Path
+        </h2>
         <button
           onClick={handleReset}
           className="inline-flex items-center gap-1.5 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10 transition-colors"
@@ -344,7 +396,7 @@ export function MyCarePath() {
 
       <div className="rounded-md border-l-4 border-l-accent bg-accent/10 p-4">
         <p className="text-sm text-foreground leading-relaxed">
-          <strong>Build your personalised care summary.</strong> Tick the areas where you need support, then generate a mini-report you can print or show your <strong>BCC Social Worker</strong>, GP, or support worker. This helps them understand your needs quickly.
+          <strong>Build a clinical summary in three quick steps:</strong> <span className="font-semibold text-primary">1.</span> Tick the areas of support that apply, <span className="font-semibold text-primary">2.</span> complete the synoptic clinical information below, then <span className="font-semibold text-primary">3.</span> generate the <strong>Clinical Summary Report</strong> and the <strong>Personal Wellbeing Plan (PWP)</strong>. Both can be downloaded as PDF to share with the GP, care coordinator, or social worker.
         </p>
       </div>
 
@@ -375,7 +427,7 @@ export function MyCarePath() {
       {/* Synoptic View — quick clinical snapshot */}
       <div className="space-y-4 rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 via-background to-accent/5 p-5 shadow-sm">
         <div className="flex items-start gap-3 border-b border-primary/15 pb-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-lg shadow-sm">🩺</div>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm"><Stethoscope className="h-5 w-5" /></div>
           <div>
             <h3 className="text-lg font-bold text-primary">Synoptic View – Quick Snapshot</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -413,8 +465,8 @@ export function MyCarePath() {
           onClick={generateReport}
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
         >
-          <ClipboardList className="h-4 w-4" />
-          Generate My Care Report
+          <FileText className="h-4 w-4" />
+          Generate Clinical Summary Report
         </button>
         <span className={`text-sm ${hint.startsWith("⚠️") ? "text-destructive" : "text-muted-foreground"}`}>
           {hint}
@@ -511,6 +563,12 @@ export function MyCarePath() {
                   <Copy className="h-3 w-3" /> Copy
                 </button>
                 <button
+                  onClick={downloadWellbeingPdf}
+                  className="inline-flex items-center gap-1 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:bg-accent/90"
+                >
+                  <FileDown className="h-3 w-3" /> PDF
+                </button>
+                <button
                   onClick={() => window.print()}
                   className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
                 >
@@ -538,7 +596,7 @@ export function MyCarePath() {
 
       {report && (
         <div className="rounded-lg border border-border bg-card p-5 shadow-sm space-y-4 print:shadow-none" id="care-report">
-          <h3 className="text-lg font-bold text-primary">📋 My Care Path – Summary Report</h3>
+          <h3 className="text-lg font-bold text-primary flex items-center gap-2"><FileText className="h-5 w-5" /> Clinical Summary Report</h3>
           <p className="text-xs text-muted-foreground">Generated: {report.date} | Bristol Mental Health Directory</p>
 
           <div className="rounded-md bg-amber-50 border border-amber-200 p-3">
@@ -569,7 +627,7 @@ export function MyCarePath() {
 
           {report.synoptic.length > 0 && (
             <div>
-              <h4 className="text-sm font-bold text-foreground mb-2">🩺 Synoptic View</h4>
+              <h4 className="text-sm font-bold text-foreground mb-2 flex items-center gap-1.5"><Stethoscope className="h-4 w-4 text-primary" /> Synoptic View</h4>
               <ul className="space-y-2">
                 {report.synoptic.map((s, i) => (
                   <li key={i} className="text-sm text-foreground">
@@ -623,11 +681,18 @@ export function MyCarePath() {
               Print Report
             </button>
             <button
-              onClick={downloadReport}
+              onClick={downloadReportPdf}
               className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition-colors"
             >
+              <FileDown className="h-4 w-4" />
+              Download PDF
+            </button>
+            <button
+              onClick={downloadReport}
+              className="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground hover:bg-secondary/80 transition-colors"
+            >
               <Download className="h-4 w-4" />
-              Download Report
+              Download .txt
             </button>
             <button
               onClick={copyReport}
