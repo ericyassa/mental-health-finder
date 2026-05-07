@@ -563,6 +563,12 @@ export function MyCarePath() {
                   <Copy className="h-3 w-3" /> Copy
                 </button>
                 <button
+                  onClick={downloadWellbeingPdf}
+                  className="inline-flex items-center gap-1 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:bg-accent/90"
+                >
+                  <FileDown className="h-3 w-3" /> PDF
+                </button>
+                <button
                   onClick={() => window.print()}
                   className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
                 >
