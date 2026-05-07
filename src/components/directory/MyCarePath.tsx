@@ -590,7 +590,7 @@ export function MyCarePath() {
 
       {report && (
         <div className="rounded-lg border border-border bg-card p-5 shadow-sm space-y-4 print:shadow-none" id="care-report">
-          <h3 className="text-lg font-bold text-primary">📋 My Care Path – Summary Report</h3>
+          <h3 className="text-lg font-bold text-primary flex items-center gap-2"><FileText className="h-5 w-5" /> Clinical Summary Report</h3>
           <p className="text-xs text-muted-foreground">Generated: {report.date} | Bristol Mental Health Directory</p>
 
           <div className="rounded-md bg-amber-50 border border-amber-200 p-3">
