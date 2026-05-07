@@ -427,7 +427,7 @@ export function MyCarePath() {
       {/* Synoptic View — quick clinical snapshot */}
       <div className="space-y-4 rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 via-background to-accent/5 p-5 shadow-sm">
         <div className="flex items-start gap-3 border-b border-primary/15 pb-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-lg shadow-sm">🩺</div>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm"><Stethoscope className="h-5 w-5" /></div>
           <div>
             <h3 className="text-lg font-bold text-primary">Synoptic View – Quick Snapshot</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
