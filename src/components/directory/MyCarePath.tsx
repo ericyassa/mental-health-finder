@@ -297,15 +297,35 @@ export function MyCarePath() {
     fetchAiRecommendation(selectedNeeds, synopticAnswers);
   };
 
-  const copyReport = () => {
-    if (!report) return;
+  const buildReportText = () => {
+    if (!report) return "";
     const synopticBlock = report.synoptic.length > 0
       ? `\n\nSynoptic View:\n${report.synoptic.map((s) => `• ${s.question}\n   ${s.answer}`).join("\n")}`
       : "";
     const aiBlock = aiRecommendation ? `\n\n--- Suggested Interim Plan (AI-generated) ---\n${aiRecommendation}` : "";
-    const text = `My Care Path – Summary Report\nGenerated: ${report.date}\n\nIdentified Needs:\n${report.selectedNeeds.map((n) => `• ${n}`).join("\n")}\n\nMatched Categories:\n${report.matchedCategories.map((c) => `• ${c.name}`).join("\n")}${synopticBlock}${aiBlock}\n\nThis report was generated from the Bristol Mental Health Signposting Directory. Not a clinical assessment.`;
-    navigator.clipboard.writeText(text);
+    const wellbeingBlock = wellbeingPlan ? `\n\n--- Personal Wellbeing Plan (AI-generated) ---\n${wellbeingPlan}` : "";
+    return `My Care Path – Summary Report\nGenerated: ${report.date}\n\nIdentified Needs:\n${report.selectedNeeds.map((n) => `• ${n}`).join("\n")}\n\nMatched Categories:\n${report.matchedCategories.map((c) => `• ${c.name}`).join("\n")}${synopticBlock}${aiBlock}${wellbeingBlock}\n\nThis report was generated from the Bristol Mental Health Signposting Directory. Not a clinical assessment.`;
   };
+
+  const copyReport = () => {
+    const text = buildReportText();
+    if (text) navigator.clipboard.writeText(text);
+  };
+
+  const downloadReport = () => {
+    const text = buildReportText();
+    if (!text) return;
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `care-path-report-${new Date().toISOString().slice(0, 10)}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
 
 
   return (
