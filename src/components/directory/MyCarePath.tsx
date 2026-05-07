@@ -183,9 +183,19 @@ export function MyCarePath() {
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
+    setHint("Select at least one need above");
+  };
+
+  const handleReset = () => {
+    setChecked(new Set());
+    setSynoptic({});
     setReport(null);
     setAiRecommendation("");
     setAiError("");
+    setWellbeingPlan("");
+    setWellbeingError("");
+    setAdjustments("");
+    setConsentShare(null);
     setHint("Select at least one need above");
   };
 
