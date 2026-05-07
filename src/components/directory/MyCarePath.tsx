@@ -380,7 +380,10 @@ export function MyCarePath() {
   return (
     <div className="space-y-6 max-w-3xl">
       <div className="flex items-center justify-between gap-3 border-b-[3px] border-b-accent pb-2 flex-wrap">
-        <h2 className="text-2xl font-bold text-primary">📋 My Care Path</h2>
+        <h2 className="text-2xl font-bold text-primary flex items-center gap-2">
+          <ClipboardCheck className="h-6 w-6" />
+          My Care Path
+        </h2>
         <button
           onClick={handleReset}
           className="inline-flex items-center gap-1.5 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10 transition-colors"
@@ -393,7 +396,7 @@ export function MyCarePath() {
 
       <div className="rounded-md border-l-4 border-l-accent bg-accent/10 p-4">
         <p className="text-sm text-foreground leading-relaxed">
-          <strong>Build your personalised care summary.</strong> Tick the areas where you need support, then generate a mini-report you can print or show your <strong>BCC Social Worker</strong>, GP, or support worker. This helps them understand your needs quickly.
+          <strong>Build a clinical summary in three quick steps:</strong> <span className="font-semibold text-primary">1.</span> Tick the areas of support that apply, <span className="font-semibold text-primary">2.</span> complete the synoptic clinical information below, then <span className="font-semibold text-primary">3.</span> generate the <strong>Clinical Summary Report</strong> and the <strong>Personal Wellbeing Plan (PWP)</strong>. Both can be downloaded as PDF to share with the GP, care coordinator, or social worker.
         </p>
       </div>
 
