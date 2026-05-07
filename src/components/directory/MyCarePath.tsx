@@ -330,9 +330,17 @@ export function MyCarePath() {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      <h2 className="text-2xl font-bold text-primary border-b-[3px] border-b-accent pb-2">
-        📋 My Care Path
-      </h2>
+      <div className="flex items-center justify-between gap-3 border-b-[3px] border-b-accent pb-2 flex-wrap">
+        <h2 className="text-2xl font-bold text-primary">📋 My Care Path</h2>
+        <button
+          onClick={handleReset}
+          className="inline-flex items-center gap-1.5 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10 transition-colors"
+          title="Clear all selections, synoptic answers, and generated reports"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          Reset Care Path
+        </button>
+      </div>
 
       <div className="rounded-md border-l-4 border-l-accent bg-accent/10 p-4">
         <p className="text-sm text-foreground leading-relaxed">
