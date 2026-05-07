@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { ClipboardList, Printer, Copy, Sparkles, Loader2, ShieldCheck } from "lucide-react";
+import { ClipboardList, Printer, Copy, Sparkles, Loader2, ShieldCheck, Download, RotateCcw } from "lucide-react";
 import { useCategories } from "@/hooks/useDirectoryData";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
