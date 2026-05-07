@@ -345,23 +345,32 @@ export function MyCarePath() {
       ))}
 
       {/* Synoptic View — quick clinical snapshot */}
-      <div className="space-y-3 rounded-lg border-l-4 border-l-primary bg-primary/5 p-4">
-        <div>
-          <h3 className="text-lg font-semibold text-primary">🩺 Synoptic View – Quick Snapshot</h3>
-          <p className="text-xs text-muted-foreground mt-1">
-            Five short questions to give your support worker a fast understanding of your past and current picture. Optional – fill in what you feel comfortable sharing.
-          </p>
+      <div className="space-y-4 rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 via-background to-accent/5 p-5 shadow-sm">
+        <div className="flex items-start gap-3 border-b border-primary/15 pb-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-lg shadow-sm">🩺</div>
+          <div>
+            <h3 className="text-lg font-bold text-primary">Synoptic View – Quick Snapshot</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Six short questions to give the support worker a fast clinical picture. Optional – fill in what is comfortable to share.
+            </p>
+          </div>
         </div>
         <div className="space-y-3">
-          {synopticQuestions.map((q) => (
-            <div key={q.id} className="space-y-1">
-              <label htmlFor={q.id} className="block text-sm font-medium text-foreground">
-                {q.label}
+          {synopticQuestions.map((q, idx) => (
+            <div
+              key={q.id}
+              className="rounded-lg border border-primary/15 bg-card/60 p-3 shadow-sm transition-shadow hover:shadow-md"
+            >
+              <label htmlFor={q.id} className="flex items-start gap-2 mb-2 text-sm font-semibold text-primary">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                  {idx + 1}
+                </span>
+                <span className="leading-tight">{q.label}</span>
               </label>
               <textarea
                 id={q.id}
                 value={synoptic[q.id] || ""}
-                onChange={(e) => { setSynoptic((p) => ({ ...p, [q.id]: e.target.value })); setReport(null); setAiRecommendation(""); setAiError(""); }}
+                onChange={(e) => setSynoptic((p) => ({ ...p, [q.id]: e.target.value }))}
                 placeholder={q.placeholder}
                 rows={2}
                 className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -369,20 +378,6 @@ export function MyCarePath() {
             </div>
           ))}
         </div>
-      </div>
-
-      <div className="flex items-center gap-3 flex-wrap">
-        <label className="text-sm font-medium text-foreground">AI provider:</label>
-        <select
-          value={provider}
-          onChange={(e) => setProvider(e.target.value as typeof provider)}
-          className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-        >
-          <option value="lovable">Lovable AI (default — no key)</option>
-          <option value="openai">OpenAI (needs OPENAI_API_KEY)</option>
-          <option value="gemini">Google Gemini (needs GEMINI_API_KEY)</option>
-          <option value="copilot">Microsoft Copilot / Azure OpenAI</option>
-        </select>
       </div>
 
       <div className="flex items-center gap-4 flex-wrap">
