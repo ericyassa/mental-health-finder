@@ -465,8 +465,8 @@ export function MyCarePath() {
           onClick={generateReport}
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
         >
-          <ClipboardList className="h-4 w-4" />
-          Generate My Care Report
+          <FileText className="h-4 w-4" />
+          Generate Clinical Summary Report
         </button>
         <span className={`text-sm ${hint.startsWith("⚠️") ? "text-destructive" : "text-muted-foreground"}`}>
           {hint}
