@@ -111,12 +111,6 @@ const carePathNeeds: CareNeedGroup[] = [
       { id: "ph_pregnancy", label: "Pregnancy or postnatal physical health", categoryNames: ["Physical Health & Wellbeing"] },
     ],
   },
-  {
-    label: "Staff Wellbeing",
-    needs: [
-      { id: "awp_staff", label: "AWP staff wellbeing support", categoryNames: ["AWP Staff Wellbeing"] },
-    ],
-  },
 ];
 
 // Synoptic clinical questions — free-text responses
