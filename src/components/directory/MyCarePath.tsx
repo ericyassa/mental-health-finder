@@ -321,6 +321,60 @@ export function MyCarePath() {
     URL.revokeObjectURL(url);
   };
 
+  const downloadPdf = (title: string, body: string, filename: string) => {
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const margin = 40;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const maxWidth = pageWidth - margin * 2;
+    let y = margin;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(40, 90, 130);
+    doc.text(title, margin, y);
+    y += 22;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(120);
+    doc.text(`Generated: ${new Date().toLocaleString("en-GB")} • Bristol MH Directory`, margin, y);
+    y += 18;
+    doc.setDrawColor(200);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 14;
+
+    doc.setTextColor(30);
+    const lines = body.replace(/\*\*/g, "").split("\n");
+    for (const raw of lines) {
+      const line = raw.replace(/^###\s*/, "").replace(/^##\s*/, "").replace(/^#\s*/, "");
+      const isHeading = /^###\s|^##\s|^#\s/.test(raw) || /^\d+\.\s+[A-Z]/.test(raw.trim());
+      doc.setFont("helvetica", isHeading ? "bold" : "normal");
+      doc.setFontSize(isHeading ? 12 : 10);
+      doc.setTextColor(isHeading ? 40 : 30, isHeading ? 90 : 30, isHeading ? 130 : 30);
+      const wrapped = doc.splitTextToSize(line || " ", maxWidth);
+      for (const w of wrapped) {
+        if (y > pageHeight - margin) { doc.addPage(); y = margin; }
+        doc.text(w, margin, y);
+        y += isHeading ? 16 : 13;
+      }
+      if (isHeading) y += 2;
+    }
+
+    doc.save(filename);
+  };
+
+  const downloadReportPdf = () => {
+    if (!report) return;
+    const body = buildReportText();
+    downloadPdf("Clinical Summary Report", body, `clinical-summary-${new Date().toISOString().slice(0, 10)}.pdf`);
+  };
+
+  const downloadWellbeingPdf = () => {
+    if (!wellbeingPlan) return;
+    downloadPdf("Personal Wellbeing Plan (PWP)", wellbeingPlan, `personal-wellbeing-plan-${new Date().toISOString().slice(0, 10)}.pdf`);
+  };
+
 
 
   return (
