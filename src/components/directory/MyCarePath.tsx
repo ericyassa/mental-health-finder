@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { ClipboardList, Printer, Copy, Sparkles, Loader2, ShieldCheck } from "lucide-react";
+import { ClipboardList, Printer, Copy, Sparkles, Loader2, ShieldCheck, Download, RotateCcw } from "lucide-react";
 import { useCategories } from "@/hooks/useDirectoryData";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -136,19 +136,46 @@ interface ReportData {
   date: string;
 }
 
+// Module-level cache so navigating away and back preserves clinician work
+const cache: {
+  checked: Set<string>;
+  synoptic: Record<string, string>;
+  report: ReportData | null;
+  aiRecommendation: string;
+  wellbeingPlan: string;
+  adjustments: string;
+  consentShare: boolean | null;
+} = {
+  checked: new Set(),
+  synoptic: {},
+  report: null,
+  aiRecommendation: "",
+  wellbeingPlan: "",
+  adjustments: "",
+  consentShare: null,
+};
+
 export function MyCarePath() {
-  const [checked, setChecked] = useState<Set<string>>(new Set());
-  const [synoptic, setSynoptic] = useState<Record<string, string>>({});
-  const [report, setReport] = useState<ReportData | null>(null);
+  const [checked, setChecked] = useState<Set<string>>(cache.checked);
+  const [synoptic, setSynoptic] = useState<Record<string, string>>(cache.synoptic);
+  const [report, setReport] = useState<ReportData | null>(cache.report);
   const [hint, setHint] = useState("Select at least one need above");
-  const [aiRecommendation, setAiRecommendation] = useState<string>("");
+  const [aiRecommendation, setAiRecommendation] = useState<string>(cache.aiRecommendation);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string>("");
-  const [wellbeingPlan, setWellbeingPlan] = useState<string>("");
+  const [wellbeingPlan, setWellbeingPlan] = useState<string>(cache.wellbeingPlan);
   const [wellbeingLoading, setWellbeingLoading] = useState(false);
   const [wellbeingError, setWellbeingError] = useState<string>("");
-  const [provider, setProvider] = useState<"lovable" | "openai" | "gemini" | "copilot">("lovable");
+  const provider = "lovable" as const;
   const { data: categories = [] } = useCategories();
+
+  // Sync state to module cache so it persists across unmount
+  useEffect(() => { cache.checked = checked; }, [checked]);
+  useEffect(() => { cache.synoptic = synoptic; }, [synoptic]);
+  useEffect(() => { cache.report = report; }, [report]);
+  useEffect(() => { cache.aiRecommendation = aiRecommendation; }, [aiRecommendation]);
+  useEffect(() => { cache.wellbeingPlan = wellbeingPlan; }, [wellbeingPlan]);
+
 
   const toggle = (id: string) => {
     setChecked((prev) => {
@@ -156,9 +183,19 @@ export function MyCarePath() {
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
+    setHint("Select at least one need above");
+  };
+
+  const handleReset = () => {
+    setChecked(new Set());
+    setSynoptic({});
     setReport(null);
     setAiRecommendation("");
     setAiError("");
+    setWellbeingPlan("");
+    setWellbeingError("");
+    setAdjustments("");
+    setConsentShare(null);
     setHint("Select at least one need above");
   };
 
@@ -260,22 +297,50 @@ export function MyCarePath() {
     fetchAiRecommendation(selectedNeeds, synopticAnswers);
   };
 
-  const copyReport = () => {
-    if (!report) return;
+  const buildReportText = () => {
+    if (!report) return "";
     const synopticBlock = report.synoptic.length > 0
       ? `\n\nSynoptic View:\n${report.synoptic.map((s) => `• ${s.question}\n   ${s.answer}`).join("\n")}`
       : "";
     const aiBlock = aiRecommendation ? `\n\n--- Suggested Interim Plan (AI-generated) ---\n${aiRecommendation}` : "";
-    const text = `My Care Path – Summary Report\nGenerated: ${report.date}\n\nIdentified Needs:\n${report.selectedNeeds.map((n) => `• ${n}`).join("\n")}\n\nMatched Categories:\n${report.matchedCategories.map((c) => `• ${c.name}`).join("\n")}${synopticBlock}${aiBlock}\n\nThis report was generated from the Bristol Mental Health Signposting Directory. Not a clinical assessment.`;
-    navigator.clipboard.writeText(text);
+    const wellbeingBlock = wellbeingPlan ? `\n\n--- Personal Wellbeing Plan (AI-generated) ---\n${wellbeingPlan}` : "";
+    return `My Care Path – Summary Report\nGenerated: ${report.date}\n\nIdentified Needs:\n${report.selectedNeeds.map((n) => `• ${n}`).join("\n")}\n\nMatched Categories:\n${report.matchedCategories.map((c) => `• ${c.name}`).join("\n")}${synopticBlock}${aiBlock}${wellbeingBlock}\n\nThis report was generated from the Bristol Mental Health Signposting Directory. Not a clinical assessment.`;
   };
+
+  const copyReport = () => {
+    const text = buildReportText();
+    if (text) navigator.clipboard.writeText(text);
+  };
+
+  const downloadReport = () => {
+    const text = buildReportText();
+    if (!text) return;
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `care-path-report-${new Date().toISOString().slice(0, 10)}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
 
 
   return (
     <div className="space-y-6 max-w-3xl">
-      <h2 className="text-2xl font-bold text-primary border-b-[3px] border-b-accent pb-2">
-        📋 My Care Path
-      </h2>
+      <div className="flex items-center justify-between gap-3 border-b-[3px] border-b-accent pb-2 flex-wrap">
+        <h2 className="text-2xl font-bold text-primary">📋 My Care Path</h2>
+        <button
+          onClick={handleReset}
+          className="inline-flex items-center gap-1.5 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10 transition-colors"
+          title="Clear all selections, synoptic answers, and generated reports"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          Reset Care Path
+        </button>
+      </div>
 
       <div className="rounded-md border-l-4 border-l-accent bg-accent/10 p-4">
         <p className="text-sm text-foreground leading-relaxed">
@@ -308,23 +373,32 @@ export function MyCarePath() {
       ))}
 
       {/* Synoptic View — quick clinical snapshot */}
-      <div className="space-y-3 rounded-lg border-l-4 border-l-primary bg-primary/5 p-4">
-        <div>
-          <h3 className="text-lg font-semibold text-primary">🩺 Synoptic View – Quick Snapshot</h3>
-          <p className="text-xs text-muted-foreground mt-1">
-            Five short questions to give your support worker a fast understanding of your past and current picture. Optional – fill in what you feel comfortable sharing.
-          </p>
+      <div className="space-y-4 rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 via-background to-accent/5 p-5 shadow-sm">
+        <div className="flex items-start gap-3 border-b border-primary/15 pb-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-lg shadow-sm">🩺</div>
+          <div>
+            <h3 className="text-lg font-bold text-primary">Synoptic View – Quick Snapshot</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Six short questions to give the support worker a fast clinical picture. Optional – fill in what is comfortable to share.
+            </p>
+          </div>
         </div>
         <div className="space-y-3">
-          {synopticQuestions.map((q) => (
-            <div key={q.id} className="space-y-1">
-              <label htmlFor={q.id} className="block text-sm font-medium text-foreground">
-                {q.label}
+          {synopticQuestions.map((q, idx) => (
+            <div
+              key={q.id}
+              className="rounded-lg border border-primary/15 bg-card/60 p-3 shadow-sm transition-shadow hover:shadow-md"
+            >
+              <label htmlFor={q.id} className="flex items-start gap-2 mb-2 text-sm font-semibold text-primary">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                  {idx + 1}
+                </span>
+                <span className="leading-tight">{q.label}</span>
               </label>
               <textarea
                 id={q.id}
                 value={synoptic[q.id] || ""}
-                onChange={(e) => { setSynoptic((p) => ({ ...p, [q.id]: e.target.value })); setReport(null); setAiRecommendation(""); setAiError(""); }}
+                onChange={(e) => setSynoptic((p) => ({ ...p, [q.id]: e.target.value }))}
                 placeholder={q.placeholder}
                 rows={2}
                 className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -332,20 +406,6 @@ export function MyCarePath() {
             </div>
           ))}
         </div>
-      </div>
-
-      <div className="flex items-center gap-3 flex-wrap">
-        <label className="text-sm font-medium text-foreground">AI provider:</label>
-        <select
-          value={provider}
-          onChange={(e) => setProvider(e.target.value as typeof provider)}
-          className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-        >
-          <option value="lovable">Lovable AI (default — no key)</option>
-          <option value="openai">OpenAI (needs OPENAI_API_KEY)</option>
-          <option value="gemini">Google Gemini (needs GEMINI_API_KEY)</option>
-          <option value="copilot">Microsoft Copilot / Azure OpenAI</option>
-        </select>
       </div>
 
       <div className="flex items-center gap-4 flex-wrap">
@@ -561,6 +621,13 @@ export function MyCarePath() {
             >
               <Printer className="h-4 w-4" />
               Print Report
+            </button>
+            <button
+              onClick={downloadReport}
+              className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition-colors"
+            >
+              <Download className="h-4 w-4" />
+              Download Report
             </button>
             <button
               onClick={copyReport}
