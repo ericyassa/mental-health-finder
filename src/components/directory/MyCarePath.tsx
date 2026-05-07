@@ -621,7 +621,7 @@ export function MyCarePath() {
 
           {report.synoptic.length > 0 && (
             <div>
-              <h4 className="text-sm font-bold text-foreground mb-2">🩺 Synoptic View</h4>
+              <h4 className="text-sm font-bold text-foreground mb-2 flex items-center gap-1.5"><Stethoscope className="h-4 w-4 text-primary" /> Synoptic View</h4>
               <ul className="space-y-2">
                 {report.synoptic.map((s, i) => (
                   <li key={i} className="text-sm text-foreground">
