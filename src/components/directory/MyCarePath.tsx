@@ -730,6 +730,3 @@ export function MyCarePath() {
     </div>
   );
 }
-    </div>
-  );
-}
