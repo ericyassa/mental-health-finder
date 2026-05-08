@@ -203,8 +203,13 @@ export function MyCarePath() {
     setAiError("");
     setWellbeingPlan("");
     setWellbeingError("");
+    setSafetyPlan("");
+    setSafetyError("");
+    setFormulation("");
+    setFormulationError("");
     setAdjustments("");
     setConsentShare(null);
+    setActiveTab("clinical");
     setHint("Select at least one need above");
   };
 
