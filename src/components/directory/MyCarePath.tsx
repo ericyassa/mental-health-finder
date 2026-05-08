@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import jsPDF from "jspdf";
-import { ClipboardList, Printer, Copy, Sparkles, Loader2, ShieldCheck, Download, RotateCcw, Stethoscope, FileText, HeartPulse, ClipboardCheck, ListChecks, FileDown } from "lucide-react";
+import { Printer, Copy, Sparkles, Loader2, ShieldCheck, Download, RotateCcw, Stethoscope, FileText, ClipboardCheck, FileDown, HeartHandshake, ShieldAlert, Brain } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useCategories } from "@/hooks/useDirectoryData";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -138,6 +139,8 @@ const cache: {
   report: ReportData | null;
   aiRecommendation: string;
   wellbeingPlan: string;
+  safetyPlan: string;
+  formulation: string;
   adjustments: string;
   consentShare: boolean | null;
 } = {
@@ -146,6 +149,8 @@ const cache: {
   report: null,
   aiRecommendation: "",
   wellbeingPlan: "",
+  safetyPlan: "",
+  formulation: "",
   adjustments: "",
   consentShare: null,
 };
@@ -161,6 +166,13 @@ export function MyCarePath() {
   const [wellbeingPlan, setWellbeingPlan] = useState<string>(cache.wellbeingPlan);
   const [wellbeingLoading, setWellbeingLoading] = useState(false);
   const [wellbeingError, setWellbeingError] = useState<string>("");
+  const [safetyPlan, setSafetyPlan] = useState<string>(cache.safetyPlan);
+  const [safetyLoading, setSafetyLoading] = useState(false);
+  const [safetyError, setSafetyError] = useState<string>("");
+  const [formulation, setFormulation] = useState<string>(cache.formulation);
+  const [formulationLoading, setFormulationLoading] = useState(false);
+  const [formulationError, setFormulationError] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<string>("clinical");
   const provider = "lovable" as const;
   const { data: categories = [] } = useCategories();
 
@@ -170,6 +182,8 @@ export function MyCarePath() {
   useEffect(() => { cache.report = report; }, [report]);
   useEffect(() => { cache.aiRecommendation = aiRecommendation; }, [aiRecommendation]);
   useEffect(() => { cache.wellbeingPlan = wellbeingPlan; }, [wellbeingPlan]);
+  useEffect(() => { cache.safetyPlan = safetyPlan; }, [safetyPlan]);
+  useEffect(() => { cache.formulation = formulation; }, [formulation]);
 
 
   const toggle = (id: string) => {
@@ -189,8 +203,13 @@ export function MyCarePath() {
     setAiError("");
     setWellbeingPlan("");
     setWellbeingError("");
+    setSafetyPlan("");
+    setSafetyError("");
+    setFormulation("");
+    setFormulationError("");
     setAdjustments("");
     setConsentShare(null);
+    setActiveTab("clinical");
     setHint("Select at least one need above");
   };
 
@@ -375,7 +394,55 @@ export function MyCarePath() {
     downloadPdf("Personal Wellbeing Plan (PWP)", wellbeingPlan, `personal-wellbeing-plan-${new Date().toISOString().slice(0, 10)}.pdf`);
   };
 
+  const collectInputs = () => {
+    const selectedNeeds: string[] = [];
+    carePathNeeds.forEach((g) => g.needs.forEach((n) => { if (checked.has(n.id)) selectedNeeds.push(n.label); }));
+    const synopticAnswers = synopticQuestions
+      .map((q) => ({ question: q.label, answer: (synoptic[q.id] || "").trim() }))
+      .filter((s) => s.answer.length > 0);
+    return { selectedNeeds, synopticAnswers };
+  };
 
+  const guardInputs = () => {
+    const hasSynoptic = synopticQuestions.some((q) => (synoptic[q.id] || "").trim().length > 0);
+    if (checked.size === 0 && !hasSynoptic) {
+      setHint("⚠️ Please tick at least one need or fill in a synoptic question");
+      return false;
+    }
+    return true;
+  };
+
+  const fetchSafetyPlan = async () => {
+    if (!guardInputs()) return;
+    const { selectedNeeds, synopticAnswers } = collectInputs();
+    setSafetyLoading(true); setSafetyError(""); setSafetyPlan("");
+    try {
+      const { data, error } = await supabase.functions.invoke("care-recommendation", {
+        body: { needs: selectedNeeds, synoptic: synopticAnswers, provider, mode: "safety", consentShare, adjustments },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setSafetyPlan(data?.recommendation || "");
+    } catch (e: any) {
+      setSafetyError(e?.message || "Could not generate safety plan.");
+    } finally { setSafetyLoading(false); }
+  };
+
+  const fetchFormulation = async () => {
+    if (!guardInputs()) return;
+    const { selectedNeeds, synopticAnswers } = collectInputs();
+    setFormulationLoading(true); setFormulationError(""); setFormulation("");
+    try {
+      const { data, error } = await supabase.functions.invoke("care-recommendation", {
+        body: { needs: selectedNeeds, synoptic: synopticAnswers, provider, mode: "formulation" },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setFormulation(data?.recommendation || "");
+    } catch (e: any) {
+      setFormulationError(e?.message || "Could not generate formulation.");
+    } finally { setFormulationLoading(false); }
+  };
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -460,254 +527,206 @@ export function MyCarePath() {
         </div>
       </div>
 
-      <div className="flex items-center gap-4 flex-wrap">
-        <button
-          onClick={generateReport}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
-          <FileText className="h-4 w-4" />
-          Generate Clinical Summary Report
-        </button>
-        <span className={`text-sm ${hint.startsWith("⚠️") ? "text-destructive" : "text-muted-foreground"}`}>
-          {hint}
-        </span>
+      {/* Output Tabs framework */}
+      <div className="rounded-xl border-2 border-primary/20 bg-card p-4 shadow-sm">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto gap-1 bg-muted/50 p-1">
+            <TabsTrigger value="clinical" className="flex flex-col items-center gap-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <FileText className="h-4 w-4" />
+              <span className="text-xs font-semibold">Clinical Summary</span>
+            </TabsTrigger>
+            <TabsTrigger value="pwp" className="flex flex-col items-center gap-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <HeartHandshake className="h-4 w-4" />
+              <span className="text-xs font-semibold">Wellbeing Plan</span>
+            </TabsTrigger>
+            <TabsTrigger value="safety" className="flex flex-col items-center gap-1 py-2 data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground">
+              <ShieldAlert className="h-4 w-4" />
+              <span className="text-xs font-semibold">Safety Plan</span>
+            </TabsTrigger>
+            <TabsTrigger value="formulation" className="flex flex-col items-center gap-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Brain className="h-4 w-4" />
+              <span className="text-xs font-semibold">Formulation (5Ps)</span>
+            </TabsTrigger>
+          </TabsList>
+
+          {/* CLINICAL SUMMARY TAB */}
+          <TabsContent value="clinical" className="mt-4 space-y-4">
+            <div className="flex items-center gap-3 flex-wrap">
+              <button onClick={generateReport} className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
+                <FileText className="h-4 w-4" /> Generate Clinical Summary
+              </button>
+              <span className={`text-sm ${hint.startsWith("⚠️") ? "text-destructive" : "text-muted-foreground"}`}>{hint}</span>
+            </div>
+
+            {report && (
+              <div className="rounded-lg border border-border bg-card p-5 shadow-sm space-y-4 print:shadow-none" id="care-report">
+                <h3 className="text-lg font-bold text-primary flex items-center gap-2"><FileText className="h-5 w-5" /> Clinical Summary Report</h3>
+                <p className="text-xs text-muted-foreground">Generated: {report.date} | Bristol Mental Health Directory</p>
+                <div className="rounded-md bg-amber-50 border border-amber-200 p-3">
+                  <p className="text-sm text-amber-800"><strong>For discussion with your BCC Social Worker or support team.</strong> Self-identified needs summary – not a clinical assessment.</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-foreground mb-2">🎯 Identified Needs ({report.selectedNeeds.length})</h4>
+                  <ul className="space-y-1">{report.selectedNeeds.map((n, i) => (<li key={i} className="text-sm">• {n}</li>))}</ul>
+                </div>
+                {report.matchedCategories.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-bold text-foreground mb-2">🏥 Matched Service Categories</h4>
+                    <ul className="space-y-1">{report.matchedCategories.map((c, i) => (<li key={i} className="text-sm">• {c.name}</li>))}</ul>
+                  </div>
+                )}
+                {report.synoptic.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-bold text-foreground mb-2 flex items-center gap-1.5"><Stethoscope className="h-4 w-4 text-primary" /> Synoptic View</h4>
+                    <ul className="space-y-2">
+                      {report.synoptic.map((s, i) => (
+                        <li key={i} className="text-sm"><div className="font-medium">• {s.question}</div><div className="pl-4 text-muted-foreground whitespace-pre-wrap">{s.answer}</div></li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <div className="rounded-lg border-2 border-primary/40 bg-primary/5 p-4 space-y-2">
+                  <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /><h4 className="text-sm font-bold text-primary">Suggested Interim Plan – While You Wait</h4></div>
+                  {aiLoading && (<div className="flex items-center gap-2 text-sm text-muted-foreground py-2"><Loader2 className="h-4 w-4 animate-spin" /> Crafting…</div>)}
+                  {aiError && (<div className="text-sm text-destructive py-2">{aiError}<button onClick={() => fetchAiRecommendation(report.selectedNeeds, report.synoptic)} className="ml-2 underline">Retry</button></div>)}
+                  {aiRecommendation && !aiLoading && (
+                    <div className="prose prose-sm max-w-none text-foreground prose-headings:text-primary prose-headings:font-semibold prose-headings:text-sm prose-p:my-1 prose-ul:my-1">
+                      <ReactMarkdown>{aiRecommendation}</ReactMarkdown>
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-2 flex-wrap pt-2">
+                  <button onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90"><Printer className="h-4 w-4" /> Print</button>
+                  <button onClick={downloadReportPdf} className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-accent-foreground hover:bg-accent/90"><FileDown className="h-4 w-4" /> PDF</button>
+                  <button onClick={downloadReport} className="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-xs font-semibold text-secondary-foreground hover:bg-secondary/80"><Download className="h-4 w-4" /> .txt</button>
+                  <button onClick={copyReport} className="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-xs font-semibold text-secondary-foreground hover:bg-secondary/80"><Copy className="h-4 w-4" /> Copy</button>
+                </div>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* PWP TAB */}
+          <TabsContent value="pwp" className="mt-4 space-y-4">
+            <div className="flex items-center gap-3 flex-wrap">
+              <button onClick={openWellbeingPrompt} disabled={wellbeingLoading} className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-foreground hover:bg-accent/90 disabled:opacity-60">
+                {wellbeingLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <HeartHandshake className="h-4 w-4" />}
+                Generate Personal Wellbeing Plan
+              </button>
+              <span className="text-xs text-muted-foreground">You'll be asked about consent & adjustments first.</span>
+            </div>
+            {(wellbeingPlan || wellbeingError) && (
+              <div className="rounded-lg border-2 border-accent/40 bg-accent/5 p-6 shadow-sm space-y-3 print:shadow-none" id="wellbeing-plan">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <h3 className="text-lg font-bold text-primary flex items-center gap-2"><HeartHandshake className="h-5 w-5" /> Personal Wellbeing Plan</h3>
+                  {wellbeingPlan && (
+                    <div className="flex gap-2">
+                      <button onClick={() => navigator.clipboard.writeText(wellbeingPlan)} className="inline-flex items-center gap-1 rounded-md bg-secondary px-3 py-1.5 text-xs font-semibold"><Copy className="h-3 w-3" /> Copy</button>
+                      <button onClick={downloadWellbeingPdf} className="inline-flex items-center gap-1 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground"><FileDown className="h-3 w-3" /> PDF</button>
+                    </div>
+                  )}
+                </div>
+                {wellbeingError && (<div className="text-sm text-destructive py-2">{wellbeingError}<button onClick={fetchWellbeingPlan} className="ml-2 underline">Retry</button></div>)}
+                {wellbeingPlan && (
+                  <div className="space-y-4 text-foreground [&_h3]:mt-5 [&_h3]:mb-2 [&_h3]:px-3 [&_h3]:py-2 [&_h3]:rounded-md [&_h3]:bg-primary [&_h3]:text-primary-foreground [&_h3]:text-sm [&_h3]:font-semibold [&_h3:first-child]:mt-0 [&_p]:text-sm [&_p]:my-1.5 [&_ul]:my-1.5 [&_li]:text-sm [&_ul]:list-disc [&_ul]:pl-5 [&_strong]:text-primary">
+                    <ReactMarkdown>{wellbeingPlan}</ReactMarkdown>
+                  </div>
+                )}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* SAFETY PLAN TAB */}
+          <TabsContent value="safety" className="mt-4 space-y-4">
+            <div className="rounded-md border-l-4 border-l-destructive bg-destructive/5 p-3">
+              <p className="text-sm text-foreground"><strong className="text-destructive">Safety Plan</strong> — generated from the synoptic & risk indicators above. Always co-produce with the service user.</p>
+            </div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <button onClick={fetchSafetyPlan} disabled={safetyLoading} className="inline-flex items-center gap-2 rounded-lg bg-destructive px-5 py-2.5 text-sm font-semibold text-destructive-foreground hover:bg-destructive/90 disabled:opacity-60">
+                {safetyLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
+                Generate Safety Plan
+              </button>
+            </div>
+            {(safetyPlan || safetyError) && (
+              <div className="rounded-lg border-2 border-destructive/40 bg-destructive/5 p-6 shadow-sm space-y-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <h3 className="text-lg font-bold text-destructive flex items-center gap-2"><ShieldAlert className="h-5 w-5" /> Safety Plan</h3>
+                  {safetyPlan && (
+                    <div className="flex gap-2">
+                      <button onClick={() => navigator.clipboard.writeText(safetyPlan)} className="inline-flex items-center gap-1 rounded-md bg-secondary px-3 py-1.5 text-xs font-semibold"><Copy className="h-3 w-3" /> Copy</button>
+                      <button onClick={() => downloadPdf("Safety Plan", safetyPlan, `safety-plan-${new Date().toISOString().slice(0,10)}.pdf`)} className="inline-flex items-center gap-1 rounded-md bg-destructive px-3 py-1.5 text-xs font-semibold text-destructive-foreground"><FileDown className="h-3 w-3" /> PDF</button>
+                    </div>
+                  )}
+                </div>
+                {safetyError && (<div className="text-sm text-destructive py-2">{safetyError}<button onClick={fetchSafetyPlan} className="ml-2 underline">Retry</button></div>)}
+                {safetyPlan && (
+                  <div className="space-y-3 text-foreground [&_h3]:mt-4 [&_h3]:mb-1.5 [&_h3]:px-3 [&_h3]:py-2 [&_h3]:rounded-md [&_h3]:bg-destructive [&_h3]:text-destructive-foreground [&_h3]:text-sm [&_h3]:font-semibold [&_h3:first-child]:mt-0 [&_p]:text-sm [&_ul]:list-disc [&_ul]:pl-5 [&_li]:text-sm [&_strong]:text-destructive">
+                    <ReactMarkdown>{safetyPlan}</ReactMarkdown>
+                  </div>
+                )}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* FORMULATION TAB */}
+          <TabsContent value="formulation" className="mt-4 space-y-4">
+            <div className="rounded-md border-l-4 border-l-primary bg-primary/5 p-3">
+              <p className="text-sm text-foreground"><strong className="text-primary">Formulation (5 Ps)</strong> — Presenting · Predisposing · Precipitating · Perpetuating · Protective. A working hypothesis to share with the MDT.</p>
+            </div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <button onClick={fetchFormulation} disabled={formulationLoading} className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60">
+                {formulationLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4" />}
+                Generate 5Ps Formulation
+              </button>
+            </div>
+            {(formulation || formulationError) && (
+              <div className="rounded-lg border-2 border-primary/40 bg-primary/5 p-6 shadow-sm space-y-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <h3 className="text-lg font-bold text-primary flex items-center gap-2"><Brain className="h-5 w-5" /> Clinical Formulation (5Ps)</h3>
+                  {formulation && (
+                    <div className="flex gap-2">
+                      <button onClick={() => navigator.clipboard.writeText(formulation)} className="inline-flex items-center gap-1 rounded-md bg-secondary px-3 py-1.5 text-xs font-semibold"><Copy className="h-3 w-3" /> Copy</button>
+                      <button onClick={() => downloadPdf("Clinical Formulation (5Ps)", formulation, `formulation-5ps-${new Date().toISOString().slice(0,10)}.pdf`)} className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"><FileDown className="h-3 w-3" /> PDF</button>
+                    </div>
+                  )}
+                </div>
+                {formulationError && (<div className="text-sm text-destructive py-2">{formulationError}<button onClick={fetchFormulation} className="ml-2 underline">Retry</button></div>)}
+                {formulation && (
+                  <div className="space-y-3 text-foreground [&_h3]:mt-4 [&_h3]:mb-1.5 [&_h3]:px-3 [&_h3]:py-2 [&_h3]:rounded-md [&_h3]:bg-primary [&_h3]:text-primary-foreground [&_h3]:text-sm [&_h3]:font-semibold [&_h3:first-child]:mt-0 [&_p]:text-sm [&_ul]:list-disc [&_ul]:pl-5 [&_li]:text-sm [&_strong]:text-primary">
+                    <ReactMarkdown>{formulation}</ReactMarkdown>
+                  </div>
+                )}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
 
-      <div className="flex items-center gap-4 flex-wrap">
-        <button
-          onClick={openWellbeingPrompt}
-          disabled={wellbeingLoading}
-          className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition-colors disabled:opacity-60"
-        >
-          {wellbeingLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-          Personal Wellbeing Plan
-        </button>
-        <span className="text-xs text-muted-foreground">
-          AI-generated — you'll be asked about consent & adjustments before generating.
-        </span>
-      </div>
-
-      {/* Consent & Adjustments Dialog */}
+      {/* Consent & Adjustments Dialog (used by PWP) */}
       <Dialog open={consentOpen} onOpenChange={setConsentOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-primary" /> Consent & Adjustments
-            </DialogTitle>
-            <DialogDescription>
-              Before we generate the wellbeing plan, please confirm a couple of things with the service user.
-            </DialogDescription>
+            <DialogTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-primary" /> Consent & Adjustments</DialogTitle>
+            <DialogDescription>Before we generate the wellbeing plan, please confirm a couple of things with the service user.</DialogDescription>
           </DialogHeader>
-
           <div className="space-y-4">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-foreground">
-                Do you consent to this information being shared with professionals (GP, care team, social worker)?
-              </p>
+              <p className="text-sm font-medium">Do you consent to this information being shared with professionals (GP, care team, social worker)?</p>
               <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant={consentShare === true ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setConsentShare(true)}
-                >
-                  Yes, I consent
-                </Button>
-                <Button
-                  type="button"
-                  variant={consentShare === false ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setConsentShare(false)}
-                >
-                  No, do not share
-                </Button>
+                <Button type="button" variant={consentShare === true ? "default" : "outline"} size="sm" onClick={() => setConsentShare(true)}>Yes, I consent</Button>
+                <Button type="button" variant={consentShare === false ? "default" : "outline"} size="sm" onClick={() => setConsentShare(false)}>No, do not share</Button>
               </div>
             </div>
-
             <div className="space-y-2">
-              <label htmlFor="adjustments" className="block text-sm font-medium text-foreground">
-                Any reasonable adjustments needed? <span className="text-muted-foreground font-normal">(e.g. easy-read, interpreter, sensory, communication preferences)</span>
-              </label>
-              <textarea
-                id="adjustments"
-                value={adjustments}
-                onChange={(e) => setAdjustments(e.target.value)}
-                placeholder="Optional — leave blank if none"
-                rows={3}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
+              <label htmlFor="adjustments" className="block text-sm font-medium">Any reasonable adjustments needed? <span className="text-muted-foreground font-normal">(e.g. easy-read, interpreter, sensory)</span></label>
+              <textarea id="adjustments" value={adjustments} onChange={(e) => setAdjustments(e.target.value)} placeholder="Optional — leave blank if none" rows={3} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
             </div>
           </div>
-
           <DialogFooter>
             <Button variant="outline" onClick={() => setConsentOpen(false)}>Cancel</Button>
-            <Button onClick={fetchWellbeingPlan} disabled={consentShare === null}>
-              <Sparkles className="h-4 w-4" /> Generate Plan
-            </Button>
+            <Button onClick={fetchWellbeingPlan} disabled={consentShare === null}><Sparkles className="h-4 w-4" /> Generate Plan</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {(wellbeingPlan || wellbeingError) && (
-        <div className="rounded-lg border-2 border-accent/40 bg-accent/5 p-6 shadow-sm space-y-3 print:shadow-none" id="wellbeing-plan">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <h3 className="text-lg font-bold text-primary flex items-center gap-2">
-              <Sparkles className="h-4 w-4" /> Personal Wellbeing Plan
-            </h3>
-            {wellbeingPlan && (
-              <div className="flex gap-2">
-                <button
-                  onClick={() => navigator.clipboard.writeText(wellbeingPlan)}
-                  className="inline-flex items-center gap-1 rounded-md bg-secondary px-3 py-1.5 text-xs font-semibold text-secondary-foreground hover:bg-secondary/80"
-                >
-                  <Copy className="h-3 w-3" /> Copy
-                </button>
-                <button
-                  onClick={downloadWellbeingPdf}
-                  className="inline-flex items-center gap-1 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:bg-accent/90"
-                >
-                  <FileDown className="h-3 w-3" /> PDF
-                </button>
-                <button
-                  onClick={() => window.print()}
-                  className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
-                >
-                  <Printer className="h-3 w-3" /> Print
-                </button>
-              </div>
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Generated by AI from your synoptic input. Concise summary for a mental health nurse — review and edit with the service user before sharing.
-          </p>
-          {wellbeingError && (
-            <div className="text-sm text-destructive py-2">
-              {wellbeingError}
-              <button onClick={fetchWellbeingPlan} className="ml-2 underline hover:no-underline">Retry</button>
-            </div>
-          )}
-          {wellbeingPlan && (
-            <div className="wellbeing-content space-y-4 text-foreground [&_h3]:mt-5 [&_h3]:mb-2 [&_h3]:px-3 [&_h3]:py-2 [&_h3]:rounded-md [&_h3]:bg-primary [&_h3]:text-primary-foreground [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:shadow-sm [&_h3:first-child]:mt-0 [&_p]:text-sm [&_p]:my-1.5 [&_p]:px-1 [&_ul]:my-1.5 [&_ul]:px-1 [&_li]:text-sm [&_li]:my-1 [&_ul]:list-disc [&_ul]:pl-5 [&_strong]:text-primary">
-              <ReactMarkdown>{wellbeingPlan}</ReactMarkdown>
-            </div>
-          )}
-        </div>
-      )}
-
-      {report && (
-        <div className="rounded-lg border border-border bg-card p-5 shadow-sm space-y-4 print:shadow-none" id="care-report">
-          <h3 className="text-lg font-bold text-primary flex items-center gap-2"><FileText className="h-5 w-5" /> Clinical Summary Report</h3>
-          <p className="text-xs text-muted-foreground">Generated: {report.date} | Bristol Mental Health Directory</p>
-
-          <div className="rounded-md bg-amber-50 border border-amber-200 p-3">
-            <p className="text-sm text-amber-800">
-              <strong>For discussion with your BCC Social Worker or support team.</strong> This is a self-identified needs summary – not a clinical assessment.
-            </p>
-          </div>
-
-          <div>
-            <h4 className="text-sm font-bold text-foreground mb-2">🎯 Identified Needs ({report.selectedNeeds.length})</h4>
-            <ul className="space-y-1">
-              {report.selectedNeeds.map((n, i) => (
-                <li key={i} className="text-sm text-foreground">• {n}</li>
-              ))}
-            </ul>
-          </div>
-
-          {report.matchedCategories.length > 0 && (
-            <div>
-              <h4 className="text-sm font-bold text-foreground mb-2">🏥 Matched Service Categories</h4>
-              <ul className="space-y-1">
-                {report.matchedCategories.map((c, i) => (
-                  <li key={i} className="text-sm text-foreground">• {c.name}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {report.synoptic.length > 0 && (
-            <div>
-              <h4 className="text-sm font-bold text-foreground mb-2 flex items-center gap-1.5"><Stethoscope className="h-4 w-4 text-primary" /> Synoptic View</h4>
-              <ul className="space-y-2">
-                {report.synoptic.map((s, i) => (
-                  <li key={i} className="text-sm text-foreground">
-                    <div className="font-medium">• {s.question}</div>
-                    <div className="pl-4 text-muted-foreground whitespace-pre-wrap">{s.answer}</div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* AI-generated interim plan */}
-          <div className="rounded-lg border-2 border-primary/40 bg-primary/5 p-4 space-y-2">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <h4 className="text-sm font-bold text-primary">Suggested Interim Plan – While You Wait</h4>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              AI-generated suggestions based on what you shared. Not clinical advice — a starting point you can use today.
-            </p>
-            {aiLoading && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Crafting your personalised suggestions…
-              </div>
-            )}
-            {aiError && (
-              <div className="text-sm text-destructive py-2">
-                {aiError}
-                <button
-                  onClick={() => fetchAiRecommendation(report.selectedNeeds, report.synoptic)}
-                  className="ml-2 underline hover:no-underline"
-                >
-                  Retry
-                </button>
-              </div>
-            )}
-            {aiRecommendation && !aiLoading && (
-              <div className="prose prose-sm max-w-none text-foreground prose-headings:text-primary prose-headings:font-semibold prose-headings:text-sm prose-headings:mt-3 prose-headings:mb-1 prose-p:my-1 prose-ul:my-1 prose-li:my-0.5">
-                <ReactMarkdown>{aiRecommendation}</ReactMarkdown>
-              </div>
-            )}
-          </div>
-
-          <div className="flex gap-3 flex-wrap pt-2">
-            <button
-              onClick={() => window.print()}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              <Printer className="h-4 w-4" />
-              Print Report
-            </button>
-            <button
-              onClick={downloadReportPdf}
-              className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition-colors"
-            >
-              <FileDown className="h-4 w-4" />
-              Download PDF
-            </button>
-            <button
-              onClick={downloadReport}
-              className="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground hover:bg-secondary/80 transition-colors"
-            >
-              <Download className="h-4 w-4" />
-              Download .txt
-            </button>
-            <button
-              onClick={copyReport}
-              className="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground hover:bg-secondary/80 transition-colors"
-            >
-              <Copy className="h-4 w-4" />
-              Copy to Clipboard
-            </button>
-          </div>
-
-          <p className="text-xs text-muted-foreground pt-2">
-            This report was generated from the Bristol Mental Health Signposting Directory. For clinical advice, please consult your GP, care coordinator, or mental health professional.
-          </p>
-        </div>
-      )}
     </div>
   );
 }
