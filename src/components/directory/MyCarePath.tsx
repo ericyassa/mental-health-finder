@@ -139,6 +139,8 @@ const cache: {
   report: ReportData | null;
   aiRecommendation: string;
   wellbeingPlan: string;
+  safetyPlan: string;
+  formulation: string;
   adjustments: string;
   consentShare: boolean | null;
 } = {
@@ -147,6 +149,8 @@ const cache: {
   report: null,
   aiRecommendation: "",
   wellbeingPlan: "",
+  safetyPlan: "",
+  formulation: "",
   adjustments: "",
   consentShare: null,
 };
