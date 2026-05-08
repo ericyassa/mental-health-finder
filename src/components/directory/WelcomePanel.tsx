@@ -10,8 +10,10 @@ export function WelcomePanel({ description, categories, onSelectCategory }: Welc
   return (
     <div className="space-y-6 max-w-3xl">
       {description && (
-        <div className="rounded-lg border-l-4 border-l-accent bg-accent/10 p-5">
-          <p className="text-sm text-foreground leading-relaxed">{description}</p>
+        <div className="rounded-lg border-2 border-primary bg-primary/10 p-5 shadow-sm">
+          <p className="text-base font-bold text-primary leading-relaxed">
+            {description}
+          </p>
         </div>
       )}
 
