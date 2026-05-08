@@ -166,6 +166,13 @@ export function MyCarePath() {
   const [wellbeingPlan, setWellbeingPlan] = useState<string>(cache.wellbeingPlan);
   const [wellbeingLoading, setWellbeingLoading] = useState(false);
   const [wellbeingError, setWellbeingError] = useState<string>("");
+  const [safetyPlan, setSafetyPlan] = useState<string>(cache.safetyPlan);
+  const [safetyLoading, setSafetyLoading] = useState(false);
+  const [safetyError, setSafetyError] = useState<string>("");
+  const [formulation, setFormulation] = useState<string>(cache.formulation);
+  const [formulationLoading, setFormulationLoading] = useState(false);
+  const [formulationError, setFormulationError] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<string>("clinical");
   const provider = "lovable" as const;
   const { data: categories = [] } = useCategories();
 
@@ -175,6 +182,8 @@ export function MyCarePath() {
   useEffect(() => { cache.report = report; }, [report]);
   useEffect(() => { cache.aiRecommendation = aiRecommendation; }, [aiRecommendation]);
   useEffect(() => { cache.wellbeingPlan = wellbeingPlan; }, [wellbeingPlan]);
+  useEffect(() => { cache.safetyPlan = safetyPlan; }, [safetyPlan]);
+  useEffect(() => { cache.formulation = formulation; }, [formulation]);
 
 
   const toggle = (id: string) => {
