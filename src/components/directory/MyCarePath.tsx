@@ -394,7 +394,55 @@ export function MyCarePath() {
     downloadPdf("Personal Wellbeing Plan (PWP)", wellbeingPlan, `personal-wellbeing-plan-${new Date().toISOString().slice(0, 10)}.pdf`);
   };
 
+  const collectInputs = () => {
+    const selectedNeeds: string[] = [];
+    carePathNeeds.forEach((g) => g.needs.forEach((n) => { if (checked.has(n.id)) selectedNeeds.push(n.label); }));
+    const synopticAnswers = synopticQuestions
+      .map((q) => ({ question: q.label, answer: (synoptic[q.id] || "").trim() }))
+      .filter((s) => s.answer.length > 0);
+    return { selectedNeeds, synopticAnswers };
+  };
 
+  const guardInputs = () => {
+    const hasSynoptic = synopticQuestions.some((q) => (synoptic[q.id] || "").trim().length > 0);
+    if (checked.size === 0 && !hasSynoptic) {
+      setHint("⚠️ Please tick at least one need or fill in a synoptic question");
+      return false;
+    }
+    return true;
+  };
+
+  const fetchSafetyPlan = async () => {
+    if (!guardInputs()) return;
+    const { selectedNeeds, synopticAnswers } = collectInputs();
+    setSafetyLoading(true); setSafetyError(""); setSafetyPlan("");
+    try {
+      const { data, error } = await supabase.functions.invoke("care-recommendation", {
+        body: { needs: selectedNeeds, synoptic: synopticAnswers, provider, mode: "safety", consentShare, adjustments },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setSafetyPlan(data?.recommendation || "");
+    } catch (e: any) {
+      setSafetyError(e?.message || "Could not generate safety plan.");
+    } finally { setSafetyLoading(false); }
+  };
+
+  const fetchFormulation = async () => {
+    if (!guardInputs()) return;
+    const { selectedNeeds, synopticAnswers } = collectInputs();
+    setFormulationLoading(true); setFormulationError(""); setFormulation("");
+    try {
+      const { data, error } = await supabase.functions.invoke("care-recommendation", {
+        body: { needs: selectedNeeds, synoptic: synopticAnswers, provider, mode: "formulation" },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setFormulation(data?.recommendation || "");
+    } catch (e: any) {
+      setFormulationError(e?.message || "Could not generate formulation.");
+    } finally { setFormulationLoading(false); }
+  };
 
   return (
     <div className="space-y-6 max-w-3xl">
