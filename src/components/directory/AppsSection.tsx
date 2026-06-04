@@ -29,12 +29,13 @@ export function AppsSection({ apps }: AppsSectionProps) {
   );
 }
 
-function AppList({ title, apps, variant }: { title: string; apps: App[]; variant: "nhs" | "paid" }) {
+function AppList({ title, apps, variant, icon }: { title: string; apps: App[]; variant: "nhs" | "paid"; icon?: React.ReactNode }) {
   return (
     <div className="flex-1 min-w-[280px] rounded-lg bg-muted p-4">
-      <h4 className={`text-sm font-bold mb-3 pb-2 border-b border-border ${
+      <h4 className={`text-sm font-bold mb-3 pb-2 border-b border-border flex items-center gap-2 ${
         variant === "nhs" ? "text-primary" : "text-amber-600"
       }`}>
+        {icon}
         {title}
       </h4>
       <ul className="space-y-2">
