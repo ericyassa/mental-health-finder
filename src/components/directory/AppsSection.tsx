@@ -1,4 +1,4 @@
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Smartphone, HeartPulse, Award } from "lucide-react";
 import type { App } from "@/hooks/useDirectoryData";
 
 interface AppsSectionProps {
