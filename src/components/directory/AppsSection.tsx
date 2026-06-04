@@ -13,8 +13,9 @@ export function AppsSection({ apps }: AppsSectionProps) {
 
   return (
     <div className="mt-8">
-      <h3 className="text-lg font-semibold text-foreground mb-4 pb-1 border-b border-border">
-        📱 Recommended Apps
+      <h3 className="text-lg font-semibold text-foreground mb-4 pb-1 border-b border-border flex items-center gap-2">
+        <Smartphone className="h-5 w-5 text-primary" />
+        Recommended Apps
       </h3>
       <div className="flex flex-wrap gap-5">
         {nhsFree.length > 0 && (
