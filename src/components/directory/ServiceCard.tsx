@@ -1,5 +1,6 @@
 import { ExternalLink, Phone, Mail, Globe, MapPin, Info, ClipboardList } from "lucide-react";
 import type { Service, ServiceContact } from "@/hooks/useDirectoryData";
+import { formatContact } from "@/lib/contactFormat";
 
 interface ServiceCardProps {
   service: Service;
