@@ -19,10 +19,10 @@ export function AppsSection({ apps }: AppsSectionProps) {
       </h3>
       <div className="flex flex-wrap gap-5">
         {nhsFree.length > 0 && (
-          <AppList title="🏥 Free NHS Apps" apps={nhsFree} variant="nhs" />
+          <AppList title="Free NHS Apps" apps={nhsFree} variant="nhs" icon={<HeartPulse className="h-4 w-4" />} />
         )}
         {paidReliable.length > 0 && (
-          <AppList title="⭐ Paid / Reliable Apps" apps={paidReliable} variant="paid" />
+          <AppList title="Paid / Reliable Apps" apps={paidReliable} variant="paid" icon={<Award className="h-4 w-4" />} />
         )}
       </div>
     </div>
