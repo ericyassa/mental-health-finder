@@ -61,15 +61,34 @@ export function ServiceCard({ service, contacts }: ServiceCardProps) {
 
       {contacts.length > 0 && (
         <div className="space-y-1.5 border-t border-dashed border-border pt-3">
-          {contacts.map((c) => (
-            <div key={c.id} className="flex min-w-0 items-start gap-2 text-sm">
-              <span className="flex min-w-[80px] shrink-0 items-center gap-1.5 font-semibold text-foreground">
-                {contactIcons[c.type] || <Info className="h-3.5 w-3.5" />}
-                {c.type}:
-              </span>
-              <span className="min-w-0 break-all text-muted-foreground">{c.value}</span>
-            </div>
-          ))}
+          {contacts.map((c) => {
+            const { href, display, valid } = formatContact(c.type, c.value);
+            return (
+              <div key={c.id} className="flex min-w-0 items-start gap-2 text-sm">
+                <span className="flex min-w-[80px] shrink-0 items-center gap-1.5 font-semibold text-foreground">
+                  {contactIcons[c.type] || <Info className="h-3.5 w-3.5" />}
+                  {c.type}:
+                </span>
+                {href && valid ? (
+                  <a
+                    href={href}
+                    target={href.startsWith("http") ? "_blank" : undefined}
+                    rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+                    className="min-w-0 break-all text-primary hover:underline"
+                  >
+                    {display}
+                  </a>
+                ) : (
+                  <span
+                    className={`min-w-0 break-all ${valid ? "text-muted-foreground" : "text-destructive"}`}
+                    title={valid ? undefined : "Invalid format"}
+                  >
+                    {display}
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
