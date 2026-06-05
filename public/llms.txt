@@ -1,0 +1,9 @@
+# Bristol Mental Health Signposting Guide
+
+> A directory of mental health services and support in Bristol — categorised signposting for clinicians and the public, with a guided care path tool.
+
+This is a signposting tool, not clinical advice. It lists local and national mental health services, recommended apps, and a guided "My Care Path" decision tool. In an emergency, call 999.
+
+## Pages
+
+- [Home](/): Browse mental health service categories, search the directory, and use the My Care Path tool.
