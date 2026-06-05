@@ -64,7 +64,6 @@ export function SearchBar({ categories, onSelectCategory }: SearchBarProps) {
     const q = debouncedQuery.toLowerCase().trim();
     if (q.length < 2) return [];
 
-    const tokens = q.split(/\s+/).filter((t) => t.length > 1 || tokens?.length === 0);
     const activeTokens = q.split(/\s+/).filter((t) => t.length > 0);
     const matchAll = (...fields: (string | null | undefined)[]) => {
       const haystack = fields.filter(Boolean).join(" ").toLowerCase();
