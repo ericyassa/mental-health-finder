@@ -50,6 +50,8 @@ export function FeedbackSection() {
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
+                type="button"
+                aria-label={`Rate ${star} ${star === 1 ? "star" : "stars"}`}
                 onClick={() => setRating(star)}
                 onMouseEnter={() => setHoveredStar(star)}
                 onMouseLeave={() => setHoveredStar(0)}
