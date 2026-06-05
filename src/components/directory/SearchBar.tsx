@@ -59,16 +59,22 @@ export function SearchBar({ categories, onSelectCategory }: SearchBarProps) {
     return map;
   }, [categories]);
 
-  // Filter results
+  // Filter results — token-based AND match across name/description/category
   const results = useMemo((): SearchResult[] => {
     const q = debouncedQuery.toLowerCase().trim();
     if (q.length < 2) return [];
 
+    const tokens = q.split(/\s+/).filter((t) => t.length > 1 || tokens?.length === 0);
+    const activeTokens = q.split(/\s+/).filter((t) => t.length > 0);
+    const matchAll = (...fields: (string | null | undefined)[]) => {
+      const haystack = fields.filter(Boolean).join(" ").toLowerCase();
+      return activeTokens.every((t) => haystack.includes(t));
+    };
+
     const matched: SearchResult[] = [];
 
-    // Search categories
     categories.forEach((c) => {
-      if (c.name.toLowerCase().includes(q) || c.description?.toLowerCase().includes(q)) {
+      if (matchAll(c.name, c.description)) {
         matched.push({
           id: c.id,
           name: c.name,
@@ -80,29 +86,29 @@ export function SearchBar({ categories, onSelectCategory }: SearchBarProps) {
       }
     });
 
-    // Search services
     allServices.forEach((s) => {
-      if (s.name.toLowerCase().includes(q) || s.description?.toLowerCase().includes(q)) {
+      const catName = categoryMap.get(s.category_id);
+      if (matchAll(s.name, s.description, catName)) {
         matched.push({
           id: s.id,
           name: s.name,
           type: "service",
           categoryId: s.category_id,
-          categoryName: categoryMap.get(s.category_id) ?? "Unknown",
+          categoryName: catName ?? "Unknown",
           description: s.description,
         });
       }
     });
 
-    // Search apps
     allApps.forEach((a) => {
-      if (a.name.toLowerCase().includes(q) || a.description?.toLowerCase().includes(q)) {
+      const catName = categoryMap.get(a.category_id);
+      if (matchAll(a.name, a.description, catName)) {
         matched.push({
           id: a.id,
           name: a.name,
           type: "app",
           categoryId: a.category_id,
-          categoryName: categoryMap.get(a.category_id) ?? "Unknown",
+          categoryName: catName ?? "Unknown",
           description: a.description,
         });
       }
