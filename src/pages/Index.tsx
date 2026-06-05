@@ -115,7 +115,12 @@ const Index = () => {
 
         {/* Mobile category select */}
         <div className="w-full shrink-0 px-4 pt-3 md:hidden">
+          <label htmlFor="mobile-category-select" className="sr-only">
+            Select a category
+          </label>
           <select
+            id="mobile-category-select"
+            aria-label="Select a category"
             value={showCarePath ? "__carepath__" : (currentCategory?.id ?? "")}
             onChange={(e) => {
               if (e.target.value === "__carepath__") {

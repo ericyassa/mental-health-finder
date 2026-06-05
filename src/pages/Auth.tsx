@@ -169,10 +169,11 @@ const Auth = () => {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-foreground block mb-1">First Name</label>
+                <label htmlFor="auth-first-name" className="text-sm font-medium text-foreground block mb-1">First Name</label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <input
+                    id="auth-first-name"
                     type="text"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
@@ -184,11 +185,11 @@ const Auth = () => {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-foreground block mb-1">Team</label>
+                <label htmlFor="auth-team" className="text-sm font-medium text-foreground block mb-1">Team</label>
                 <div className="relative">
                   <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
                   <Select value={team} onValueChange={setTeam}>
-                    <SelectTrigger className="pl-10">
+                    <SelectTrigger id="auth-team" aria-label="Team" className="pl-10">
                       <SelectValue placeholder="Select your team" />
                     </SelectTrigger>
                     <SelectContent>
@@ -204,12 +205,13 @@ const Auth = () => {
 
               {!isLogin && (
                 <div>
-                  <label className="text-sm font-medium text-foreground block mb-1">
+                  <label htmlFor="auth-favorite-meal" className="text-sm font-medium text-foreground block mb-1">
                     Favourite Meal <span className="text-muted-foreground font-normal">(security question)</span>
                   </label>
                   <div className="relative">
                     <UtensilsCrossed className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <input
+                      id="auth-favorite-meal"
                       type="text"
                       value={favoriteMeal}
                       onChange={(e) => setFavoriteMeal(e.target.value)}
@@ -223,10 +225,11 @@ const Auth = () => {
               )}
 
               <div>
-                <label className="text-sm font-medium text-foreground block mb-1">Password</label>
+                <label htmlFor="auth-password" className="text-sm font-medium text-foreground block mb-1">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <input
+                    id="auth-password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
