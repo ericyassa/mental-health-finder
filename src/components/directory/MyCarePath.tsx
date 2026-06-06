@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import jsPDF from "jspdf";
-import { Printer, Copy, Sparkles, Loader2, ShieldCheck, Download, RotateCcw, Stethoscope, FileText, ClipboardCheck, FileDown, HeartHandshake, ShieldAlert, Brain } from "lucide-react";
+import { Printer, Copy, Sparkles, Loader2, ShieldCheck, Download, RotateCcw, Stethoscope, FileText, ClipboardCheck, FileDown, HeartHandshake, ShieldAlert, Brain, Activity } from "lucide-react";
+import { Screeners } from "./Screeners";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useCategories } from "@/hooks/useDirectoryData";
 import { supabase } from "@/integrations/supabase/client";
