@@ -531,7 +531,11 @@ export function MyCarePath() {
       {/* Output Tabs framework */}
       <div className="rounded-xl border-2 border-primary/20 bg-card p-4 shadow-sm">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto gap-1 bg-muted/50 p-1">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 h-auto gap-1 bg-muted/50 p-1">
+            <TabsTrigger value="screeners" className="flex flex-col items-center gap-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Activity className="h-4 w-4" />
+              <span className="text-xs font-semibold">Screeners</span>
+            </TabsTrigger>
             <TabsTrigger value="clinical" className="flex flex-col items-center gap-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <FileText className="h-4 w-4" />
               <span className="text-xs font-semibold">Clinical Summary</span>
@@ -549,6 +553,12 @@ export function MyCarePath() {
               <span className="text-xs font-semibold">Formulation (5Ps)</span>
             </TabsTrigger>
           </TabsList>
+
+          {/* SCREENERS TAB */}
+          <TabsContent value="screeners" className="mt-4">
+            <Screeners />
+          </TabsContent>
+
 
           {/* CLINICAL SUMMARY TAB */}
           <TabsContent value="clinical" className="mt-4 space-y-4">
